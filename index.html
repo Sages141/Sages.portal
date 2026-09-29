@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
+<head> 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sages | Игровое сообщество</title>
@@ -1236,7 +1238,11 @@
             }
 
             if(id === 'screen-admin') { renderPromos(); renderRequests(); renderAllUsersAdmin(); renderShopBuilder(); }
-        }
-    </script>
+        } 
+    </script> 
+    const supabaseUrl = 'https://uo7pQjXTUkbqSskyS2hzFA.supabase.co';
+const supabaseKey = 'sb_publishable_uo7pQjXTUkbqSskyS2hzFA_75U5ixQr';
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
 </body>
 </html>
