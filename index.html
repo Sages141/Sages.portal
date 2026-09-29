@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sages | Игровое сообщество</title>
+    <style>
+        :root {
+            --bg-color: #080503;
+            --card-bg: rgba(18, 11, 8, 0.96);
+            --primary-orange: #ff5500;
+            --accent-glow: rgba(255, 85, 0, 0.3);
+            --text-main: #ffffff;
+            --text-muted: #c2b8b2;
+            --border-color: rgba(255, 85, 0, 0.3);
+            --success: #00e65b;
+            --danger: #ff3344;
+            
+            /* Цвета ролей */
+            --role-main-admin: #ff7700;
+            --role-admin: #9933ff;
+            --role-moderator: #0088ff;
+            --role-sub: #00cc99;
+            --role-pw: #00cc44;
+            --role-member: #ffcc00;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 50% 10%, rgba(255, 85, 0, 0.1) 0%, transparent 60%),
+                linear-gradient(to bottom, #0a0604, #000000);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 10px 100px 10px;
+            overflow-x: hidden;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px var(--accent-glow);
+            backdrop-filter: blur(20px);
+            margin-bottom: 10px;
+        }
+
+        @media (min-width: 850px) {
+            .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+            .full-width { grid-column: span 2; }
+        }
+        @media (max-width: 849px) {
+            .grid-layout { display: flex; flex-direction: column; gap: 16px; }
+        }
+
+        .screen { display: none; animation: fadeIn 0.25s ease; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .brand-header { text-align: center; margin-bottom: 20px; }
+        .brand-header h1 { font-size: 42px; letter-spacing: 4px; color: var(--primary-orange); text-shadow: 0 0 20px rgba(255,85,0,0.6); font-weight: 900; margin-bottom: 4px; }
+        .brand-header p { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-weight: bold; }
+
+        .card { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 85, 0, 0.15); border-radius: 16px; padding: 18px; margin-bottom: 16px; }
+        .card-title { font-size: 14px; font-weight: 800; color: var(--primary-orange); text-transform: uppercase; margin-bottom: 14px; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+
+        .online-status-box { background: linear-gradient(145deg, rgba(0,255,100,0.08), rgba(0,0,0,0.6)); border: 1px solid rgba(0,255,100,0.25); padding: 14px 18px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: bold; margin-bottom: 16px; }
+        .online-dot { width: 12px; height: 12px; background-color: #00ff66; border-radius: 50%; box-shadow: 0 0 10px #00ff66; display: inline-block; transition: 0.3s; }
+        .online-dot.offline { background-color: #555; box-shadow: none; }
+
+        .audio-toggle-btn { background: rgba(255,85,0,0.15); border: 1px solid var(--primary-orange); color: #fff; font-size: 11px; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; margin: 0; }
+        .audio-toggle-btn.off { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); color: var(--text-muted); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+        @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
+        
+        .stat-item { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.04); }
+        .stat-val { font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 4px; }
+        .stat-lbl { font-size: 11px; color: var(--text-muted); line-height: 1.2; font-weight: bold; }
+
+        .interactive-chart-box { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 14px; position: relative; }
+        .chart-bars-row { display: flex; align-items: flex-end; gap: 4px; height: 50px; margin-top: 8px; }
+        .chart-bar-single { flex: 1; background: rgba(255,85,0,0.3); border-radius: 3px 3px 0 0; cursor: pointer; transition: 0.2s; }
+        .chart-bar-single:hover { background: var(--primary-orange); }
+        
+        #chart-tooltip { position: absolute; background: rgba(10,5,3,0.98); border: 1px solid var(--primary-orange); padding: 10px 14px; border-radius: 8px; font-size: 13px; color: #fff; pointer-events: none; display: none; z-index: 9999; box-shadow: 0 5px 15px rgba(255,85,0,0.5); white-space: nowrap; font-weight: bold; }
+
+        .pros-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        @media (max-width: 600px) { .pros-grid { grid-template-columns: 1fr; } }
+        .pro-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,85,0,0.15); padding: 14px; border-radius: 12px; }
+        .pro-card h4 { font-size: 14px; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+        .pro-card p { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin: 0; }
+
+        .btn-action { display: block; width: 100%; padding: 14px; background: linear-gradient(135deg, #ff5500, #b32d00); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; text-align: center; transition: 0.2s; text-decoration: none; }
+        .btn-action:hover { filter: brightness(1.15); transform: translateY(-1px); }
+        .btn-danger { background: linear-gradient(135deg, #ff3344, #b30011); }
+        .btn-success { background: linear-gradient(135deg, #00e65b, #00b347); box-shadow: 0 4px 15px rgba(0, 230, 91, 0.3); }
+
+        .btn-social { width: 100%; padding: 12px; border-radius: 10px; font-size: 13px; font-weight: bold; border: 1px solid rgba(255,255,255,0.08); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; color: white; text-decoration: none; transition: 0.2s; margin-bottom: 8px; }
+        .btn-vk { background: linear-gradient(135deg, #0077ff, #0044aa); }
+        .btn-discord { background: linear-gradient(135deg, #5865f2, #353fa0); }
+        .btn-email { background: rgba(255,255,255,0.08); }
+        .btn-social:hover { filter: brightness(1.2); }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; font-weight: bold; }
+        .form-control { width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 14px; outline: none; }
+        .form-control:focus { border-color: var(--primary-orange); }
+
+        .profile-card { display: flex; align-items: center; gap: 16px; background: rgba(0,0,0,0.4); padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+        .avatar { width: 55px; height: 55px; border-radius: 50%; background: linear-gradient(135deg, #ff5500, #220a00); display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid var(--primary-orange); }
+        .profile-info h3 { font-size: 18px; margin-bottom: 4px; color: #fff; display: flex; align-items: center; gap: 8px; margin-top: 0; }
+        .profile-info p { font-size: 12px; color: var(--text-muted); margin: 2px 0; }
+
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #060402; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
+        .nav-tab { background: none; border: none; color: var(--text-muted); font-size: 11px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
+        .nav-tab.active { color: var(--primary-orange); text-shadow: 0 0 10px rgba(255,85,0,0.4); }
+        .nav-tab svg { width: 22px; height: 22px; fill: currentColor; }
+
+        .footer-legal { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 5px; font-weight: bold; }
+
+        .list-item { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,165,0,0.2); padding: 14px; border-radius: 12px; margin-bottom: 10px; position: relative; font-size: 13px; transition: 0.2s; }
+        .btn-close { position: absolute; top: 12px; right: 12px; background: var(--danger); color: #fff; border: none; border-radius: 6px; width: 24px; height: 24px; font-size: 12px; cursor: pointer; font-weight: bold; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .btn-close:hover { filter: brightness(1.2); }
+        .btn-small { padding: 8px 14px; font-size: 12px; border-radius: 8px; border: none; font-weight: bold; color: #fff; cursor: pointer; transition: 0.2s; margin: 0; }
+        .btn-small:hover { filter: brightness(1.1); }
+        .role-tag { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-top: 6px; border: 1px solid; }
+        
+        .period-select-large { background: rgba(0,0,0,0.6); border: 1px solid var(--primary-orange); color: #fff; font-size: 13px; padding: 4px 10px; border-radius: 6px; outline: none; cursor: pointer; font-weight: bold; }
+        .scrollable-list { max-height: 450px; overflow-y: auto; padding-right: 6px; }
+        .scrollable-list::-webkit-scrollbar { width: 5px; }
+        .scrollable-list::-webkit-scrollbar-thumb { background: var(--primary-orange); border-radius: 10px; }
+
+        .btn-bonus-toggle { width: 100%; background: #00d636; color: #ffffff; border: none; border-radius: 10px; padding: 14px; margin-bottom: 10px; font-size: 13px; font-weight: 800; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: flex-start; gap: 10px; transition: 0.2s; }
+        .btn-bonus-toggle.off { background: #ff3344; box-shadow: 0 4px 15px rgba(255, 51, 68, 0.3); }
+        .bonus-dot { width: 12px; height: 12px; border-radius: 50%; background: #aaffcc; box-shadow: inset 0 0 3px rgba(0,0,0,0.3); }
+        .btn-bonus-toggle.off .bonus-dot { background: #ffaaaa; }
+        
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Блок индивидуальных настроек */
+        .individual-perms-box { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px dashed rgba(255,85,0,0.3); }
+    </style>
+</head>
+<body>
+
+    <!-- Глобальная тултипа для графиков -->
+    <div id="chart-tooltip"></div>
+
+    <div class="main-container">
+        
+        <!-- ЭКРАН 1: ГЛАВНАЯ -->
+        <div id="screen-home" class="screen active">
+            <div class="brand-header full-width">
+                <h1>Sages</h1>
+                <p>Элитное игровое сообщество</p>
+            </div>
+
+            <div class="grid-layout">
+                <!-- ЛЕВАЯ КОЛОНКА -->
+                <div>
+                    <!-- Компактный блок статуса и аудио -->
+                    <div class="online-status-box">
+                        <div style="display:flex; align-items:center;">
+                            <div class="online-dot"></div> 
+                            <span style="margin-left: 8px;">Бойцов в сети: <span style="color:var(--success);">24</span></span>
+                        </div>
+                        <button class="audio-toggle-btn off" id="audio-toggle-switch" onclick="toggleGlobalAudio()">🎵 Звук: ВЫКЛ</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">
+                            <span>📊 Детальная статистика</span>
+                            <select class="period-select-large" id="stats-select" onchange="playSound(); updateStats()">
+                                <option value="day">За день</option>
+                                <option value="week">За неделю</option>
+                                <option value="month" selected>За месяц</option>
+                                <option value="year">За год</option>
+                                <option value="all">За всё время</option>
+                            </select>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-item"><div class="stat-val" id="stat-pc">~10.2К</div><div class="stat-lbl">💻 ПК</div></div>
+                            <div class="stat-item"><div class="stat-val" id="stat-mob">~4.8К</div><div class="stat-lbl">📱 Смарт</div></div>
+                            <div class="stat-item"><div class="stat-val" id="stat-tab">~2.7К</div><div class="stat-lbl">📟 Планшет</div></div>
+                            <div class="stat-item"><div class="stat-val" id="stat-tv">~1.3К</div><div class="stat-lbl">📺 ТВ</div></div>
+                        </div>
+
+                        <div class="stats-grid" style="margin-bottom: 10px;">
+                            <div class="stat-item"><div class="stat-val" id="stat-cr" style="color:var(--success);">+112</div><div class="stat-lbl">Создано</div></div>
+                            <div class="stat-item"><div class="stat-val" id="stat-del" style="color:var(--danger);">-15</div><div class="stat-lbl">Удалено</div></div>
+                            <div class="stat-item"><div class="stat-val" id="stat-ban" style="color:var(--primary-orange);">12</div><div class="stat-lbl">Банов</div></div>
+                            <div class="stat-item"><div class="stat-val" id="stat-unban" style="color:var(--success);">8</div><div class="stat-lbl">Разбанов</div></div>
+                        </div>
+
+                        <div class="interactive-chart-box">
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: bold;">Активность (наведите для деталей):</div>
+                            <div class="chart-bars-row" id="interactive-bars-grid-home"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ПРАВАЯ КОЛОНКА -->
+                <div>
+                    <!-- БЫСТРЫЙ ВХОД -->
+                    <div class="card" id="auth-box" style="margin-bottom: 24px;">
+                        <div class="card-title">⚡ Быстрый вход в сообщество</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
+                            Авторизуйтесь, чтобы надежно сохранить профиль на этом устройстве.
+                        </div>
+                        <div>
+                            <button class="btn-social btn-vk" onclick="instantLogin('VK ID')">💙 Войти через VK ID</button>
+                            <button class="btn-social btn-discord" onclick="instantLogin('Discord')">🎮 Войти через Discord</button>
+                            <button class="btn-social btn-email" style="margin-bottom: 0;" onclick="instantLogin('E-mail')">📧 Регистрация по E-mail</button>
+                        </div>
+                    </div>
+
+                    <!-- Карточка профиля после входа -->
+                    <div class="card" id="mini-profile-box" style="display: none; margin-bottom: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <div style="width: 44px; height: 44px; background: var(--primary-orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;">⚡</div>
+                                <div>
+                                    <div style="font-weight: bold; font-size: 16px; color: #fff;" id="mini-nick">Ник</div>
+                                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;" id="mini-status">Ожидает подтверждения</div>
+                                </div>
+                            </div>
+                            <button class="btn-small" style="background: rgba(255,255,255,0.15); padding: 8px 14px;" onclick="logout()">Выйти</button>
+                        </div>
+                    </div>
+
+                    <!-- ССЫЛКИ -->
+                    <div class="card">
+                        <div class="card-title">🌐 Наши ресурсы</div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <a href="https://vk.ru/sages_community" target="_blank" class="btn-action" style="flex: 1; margin: 0; padding: 12px; font-size: 12px; background: linear-gradient(135deg, #0077ff, #0044aa); box-shadow: none;">💬 Паблик VK</a>
+                            <a href="https://discord.gg/snZnu42c7j" target="_blank" class="btn-action" style="flex: 1; margin: 0; padding: 12px; font-size: 12px; background: linear-gradient(135deg, #5865f2, #353fa0); box-shadow: none;">🎧 Discord</a>
+                            <a href="https://vk.ru/armen4ick96" target="_blank" class="btn-action" style="flex: 1; margin: 0; padding: 12px; font-size: 12px; background: linear-gradient(135deg, #ff5500, #b32d00); box-shadow: none;">⚡ Мастер</a>
+                        </div>
+                    </div>
+
+                    <!-- ПРЕИМУЩЕСТВА С ОБНОВЛЕННОЙ ЗАЩИТОЙ -->
+                    <div class="card" style="margin-bottom: 0;">
+                        <div class="card-title">🌟 Наши преимущества</div>
+                        <div class="pros-grid">
+                            <div class="pro-card">
+                                <h4>🎁 Ценные призы</h4>
+                                <p>Накапливайте Sages-Coins и получайте реальный шанс выиграть крутой мерч и эксклюзивные игровые бонусы.</p>
+                            </div>
+                            <div class="pro-card">
+                                <h4>🛡️ Защита данных</h4>
+                                <p>Надежная облачная High-Availability архитектура, полное <b>HTTPS-шифрование</b> трафика и безопасный вход.</p>
+                            </div>
+                            <div class="pro-card">
+                                <h4>⚡ Поддержка</h4>
+                                <p>Прямая связь с руководством штаба и помощь от опытных соратников в любых игровых вопросах.</p>
+                            </div>
+                            <div class="pro-card">
+                                <h4>🤝 Элитный статус</h4>
+                                <p>Признание, продвижение по ролям и глубокое уважение на всех ресурсах нашего проекта.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 2: ЛИЧНЫЙ КАБИНЕТ -->
+        <div id="screen-profile" class="screen">
+            <div class="brand-header">
+                <h1>Кабинет</h1>
+                <p>Личный профиль участника</p>
+            </div>
+            
+            <div class="grid-layout">
+                <div>
+                    <div class="profile-card" style="background: transparent; border: none; padding: 0; margin-bottom: 16px; flex-direction: column; align-items: flex-start; gap: 8px;">
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            <div class="avatar">⚡</div>
+                            <div>
+                                <h3 id="display-nick">Гость</h3>
+                                <p id="profile-device-info">Устройство: Не определено</p>
+                                <p id="profile-auth-status" style="font-weight: bold; color: var(--text-muted); margin-top: 4px;">Не авторизован</p>
+                                <div id="profile-role-display"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="block-coins" class="card" style="text-align: center; background: rgba(255,85,0,0.05); border-color: rgba(255,85,0,0.2); margin-bottom: 24px;">
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px; font-weight: bold;">БАЛАНС SAGES-COINS</div>
+                        <div style="font-size: 34px; font-weight: 900; color: var(--primary-orange); text-shadow: 0 0 10px rgba(255,85,0,0.4);">50 <span style="font-size: 16px;">SC</span></div>
+                    </div>
+                    
+                    <div class="card" style="background: rgba(255,140,0,0.05);">
+                        <div class="card-title" style="color: #ffaa00;">🏆 Что такое Sages-Coin?</div>
+                        <p style="font-size: 12px; color: #dcd6d2; line-height: 1.5; margin: 0;">
+                            <b>Sages-Coin (SC)</b> — это внутренняя валюта активности нашего сообщества. Накапливая SC, вы получаете доступ к эксклюзивным наградам, фирменному мерчу и участвуете в закрытых ивентах.
+                        </p>
+                    </div>
+
+                    <div class="card">
+                        <div class="form-group">
+                            <label>Ваш игровой позывной</label>
+                            <input type="text" id="prof-nick" class="form-control" placeholder="Введите позывной...">
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-action" style="flex:1; margin:0; padding:12px;" onclick="saveProfile()">Сохранить позывной</button>
+                            <button class="btn-action btn-danger" style="width: auto; padding: 12px 16px; margin:0;" onclick="deleteMyNick()">Удалить</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card" id="block-promos">
+                        <div class="card-title">🎟️ Активация кода</div>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" class="form-control" placeholder="Вставьте код..." style="margin: 0; padding:12px;">
+                            <button class="btn-action" style="width: auto; padding: 0 24px; margin: 0;" onclick="playSound(); alert('Код проверяется!')">ОК</button>
+                        </div>
+                    </div>
+
+                    <div class="card" id="block-shop-user">
+                        <div class="card-title">🎁 Обменник наград</div>
+                        <div id="shop-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 3: ПОДДЕРЖКА -->
+        <div id="screen-cashback" class="screen">
+            <div class="brand-header">
+                <h1>Поддержка</h1>
+                <p>Развитие сообщества Sages</p>
+            </div>
+            
+            <div class="grid-layout">
+                <div class="card" id="block-donate">
+                    <div class="card-title">🚀 Поддержка проекта по желанию</div>
+                    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 16px;">
+                        Добровольная поддержка помогает нам улучшать инфраструктуру сообщества, оплачивать хостинги, проводить крупные ивенты и закупать фирменный мерч. Вы получаете бонусные Sages-Coins!
+                    </p>
+                    <div class="form-group">
+                        <label>Сумма поддержки (руб)</label>
+                        <input type="number" id="input-donation" class="form-control" placeholder="Например: 300">
+                    </div>
+                    <button class="btn-action" onclick="claimCashback()">Поддержать / Получить SC</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 4: ПАНЕЛЬ ПРАВ (АДМИНКА) -->
+        <div id="screen-admin" class="screen">
+            <div class="brand-header">
+                <h1>Панель прав</h1>
+                <p>Управление участниками и сообществом</p>
+            </div>
+
+            <div class="grid-layout">
+                <!-- ЛЕВАЯ КОЛОНКА -->
+                <div>
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div class="card-title">📈 Статистика базы данных</div>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center; background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px;">
+                            <div>Создано<br><span style="color: var(--success); font-size: 20px;" id="admin-db-reg">112</span></div>
+                            <div>Удалено<br><span style="color: var(--danger); font-size: 20px;" id="admin-db-del">15</span></div>
+                            <div>Банов<br><span style="color: var(--primary-orange); font-size: 20px;" id="admin-db-ban">12</span></div>
+                            <div>Разбанов<br><span style="color: var(--success); font-size: 20px;" id="admin-db-unban">8</span></div>
+                        </div>
+                        
+                        <div class="interactive-chart-box">
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: bold;">График посещений (Зашло / Вышло):</div>
+                            <div class="chart-bars-row" id="interactive-bars-grid-admin"></div>
+                        </div>
+                    </div>
+
+                    <div class="card" id="admin-block-bonus" style="margin-bottom: 24px;">
+                        <div class="card-title">⚡ УПРАВЛЕНИЕ БОНУСАМИ</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Отключает соответствующие блоки на сайте для всех игроков.</div>
+                        <button class="btn-bonus-toggle" id="btn-toggle-coins" onclick="toggleAppSetting('coins')"><div class="bonus-dot"></div> НАЧИСЛЕНИЕ SAGES-COINS: ВКЛ</button>
+                        <button class="btn-bonus-toggle" id="btn-toggle-promos" onclick="toggleAppSetting('promos')"><div class="bonus-dot"></div> АКТИВАЦИЯ ПРОМОКОДОВ: ВКЛ</button>
+                        <button class="btn-bonus-toggle" id="btn-toggle-donate" onclick="toggleAppSetting('donate')" style="margin-bottom: 0;"><div class="bonus-dot"></div> ПОДДЕРЖКА ЗА РУБЛИ: ВКЛ</button>
+                    </div>
+
+                    <div class="card" id="admin-block-users" style="margin-bottom: 24px;">
+                        <div class="card-title">👥 Все участники и мониторинг</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4;">Список пользователей. Кнопка ⚙️ отключает индивидуальные доступы. Крестик удаляет профиль из БД.</div>
+                        <div class="scrollable-list" id="admin-all-users-list"></div>
+                    </div>
+
+                    <div class="card" id="admin-block-bans">
+                        <div class="card-title">⛔ Бан-лист</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4;">Заблокированные пользователи.</div>
+                        <div class="scrollable-list" id="admin-banned-list"></div>
+                    </div>
+                </div>
+
+                <!-- ПРАВАЯ КОЛОНКА -->
+                <div>
+                    <!-- Запросы входов пустые как на скриншоте -->
+                    <div class="card" id="admin-block-reqs" style="margin-bottom: 24px;">
+                        <div class="card-title">📥 Запросы входов (Ожидают)</div>
+                        <div id="admin-requests-list">
+                            <div style="text-align:center; padding: 20px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); font-size: 13px;">Нет заявок</div>
+                        </div>
+                    </div>
+
+                    <!-- МЕГА МАТРИЦА (ПО СКРИНШОТУ[span_4](start_span)[span_4](end_span) И ЗАПРОСУ) -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div class="card-title" style="color:var(--primary-orange);">🔐 МАТРИЦА ПРАВ РОЛЕЙ</div>
+                        <div class="form-group">
+                            <label>Настроить права для роли:</label>
+                            <select class="form-control" id="rbac-role-select" onchange="playSound(); loadRolePerms()">
+                                <option value="Главный администратор">Главный администратор</option>
+                                <option value="Администратор">Администратор</option>
+                                <option value="Модератор" selected>Модератор</option>
+                                <option value="Подписчик">Подписчик</option>
+                                <option value="Участник Perfect world">Участник Perfect world</option>
+                                <option value="Участник">Участник</option>
+                            </select>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <label style="color:#fff; font-size:12px; display:flex; align-items:center; gap:8px;"><input type="checkbox" id="perm-profile"> Вкладка Кабинет</label>
+                            <label style="color:#fff; font-size:12px; display:flex; align-items:center; gap:8px;"><input type="checkbox" id="perm-support"> Вкладка Поддержка</label>
+                            <label style="color:#fff; font-size:12px; display:flex; align-items:center; gap:8px;"><input type="checkbox" id="perm-admin"> Вкладка Админка</label>
+                            <label style="color:#fff; font-size:12px; display:flex; align-items:center; gap:8px;"><input type="checkbox" id="perm-roles"> Выдача ролей</label>
+                            <label style="color:#fff; font-size:12px; display:flex; align-items:center; gap:8px;"><input type="checkbox" id="perm-edit-users"> Бан / Разбан / Входы</label>
+                            <label style="color:#fff; font-size:12px; display:flex; align-items:center; gap:8px;"><input type="checkbox" id="perm-create-promo"> Создавать промо</label>
+                            <label style="color:#fff; font-size:12px; display:flex; align-items:center; gap:8px;"><input type="checkbox" id="perm-edit-shop"> Настр. магазина</label>
+                        </div>
+                        <button class="btn-success" style="width: 100%; border:none; border-radius:10px; color:#fff; font-weight:bold; padding:14px; margin-top:16px; cursor:pointer;" onclick="saveRolePerms()">Сохранить права роли</button>
+                    </div>
+
+                    <div class="card" id="admin-block-promo" style="margin-bottom: 24px;">
+                        <div class="card-title">🎟️ Создание промокода</div>
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label>Код</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="admin-code-val" class="form-control" value="Sages-VIP" style="font-weight: bold; color: var(--primary-orange); padding:12px;">
+                                <button class="btn-small" style="background: #444; padding: 0 14px; font-size: 14px;" onclick="document.getElementById('admin-code-val').value='Sages-'+Math.floor(Math.random()*9999)">🔄</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Описание / Награда</label>
+                            <input type="text" id="admin-code-desc" class="form-control" value="+200 SC за активность" style="padding:12px;">
+                        </div>
+                        <button class="btn-success" style="width: 100%; border:none; border-radius:10px; color:#fff; font-weight:bold; padding:14px; cursor:pointer;" onclick="createPromo()">Опубликовать код</button>
+
+                        <div class="card-title" style="margin-top: 20px;">🗑️ Активные промокоды</div>
+                        <div id="admin-promos-list"></div>
+                    </div>
+
+                    <div class="card" id="admin-block-shop">
+                        <div class="card-title flex-between">
+                            <span>🎁 Конструктор наград</span>
+                            <button class="btn-small" style="background: rgba(255,255,255,0.1); padding: 6px 12px;" onclick="addShopItem()">+ Добавить</button>
+                        </div>
+                        <div id="admin-shop-builder"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-legal">
+        Оганесян Армен Арттурикович, 614110176423
+    </div>
+
+    <nav class="nav-bar" id="main-nav-bar">
+        <button class="nav-tab active" id="tab-home" onclick="switchTab('screen-home', this, '🏠 Главная')">
+            <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Главная
+        </button>
+        <button class="nav-tab" id="tab-profile" onclick="switchTab('screen-profile', this, '👤 Кабинет')">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> Кабинет
+        </button>
+        <button class="nav-tab" id="tab-support" onclick="switchTab('screen-cashback', this, '🚀 Поддержка')">
+            <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg> Поддержка
+        </button>
+        <button class="nav-tab" id="tab-admin" onclick="switchTab('screen-admin', this, '⚙️ Панель прав')">
+            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg> Права
+        </button>
+    </nav>
+
+    <script>
+        // --- ГЛОБАЛЬНЫЙ СБРОС КЕША ДЛЯ НОВЫХ ПРАВ ---
+        if(!localStorage.getItem('sages_v_final_mega_5')) {
+            localStorage.clear();
+            localStorage.setItem('sages_v_final_mega_5', '1');
+        }
+
+        let audioEnabled = false;
+        let audioCtx = null;
+        let ambientInterval = null;
+        
+        let currentUser = JSON.parse(localStorage.getItem('sages_user')) || null;
+        let appSettings = JSON.parse(localStorage.getItem('sages_app_settings')) || { coins: true, promos: true, donate: true };
+        let promoList = [{ code: "Sages-K9R2", desc: "Дает +150 SC за активность в чате." }];
+        let shopItems = [
+            { id: 1, name: "Закрытый контент", desc: "Доступ к секретным материалам", price: 200, active: true },
+            { id: 2, name: "Участие в розыгрыше", desc: "Шанс выиграть призы", price: 150, active: true }
+        ];
+
+        let adminRequests = JSON.parse(localStorage.getItem('sages_requests')) || [];
+
+        const ROLES = {
+            "Главный администратор": "var(--role-main-admin)",
+            "Администратор": "var(--role-admin)",
+            "Модератор": "var(--role-moderator)",
+            "Подписчик": "var(--role-sub)",
+            "Участник Perfect world": "var(--role-pw)",
+            "Участник": "var(--role-member)",
+            "Заблокирован": "var(--danger)"
+        };
+
+        // В матрицу добавлены права: roles (Выдача ролей) и editUsers (Бан/Разбан/Входы)
+        let rolePerms = JSON.parse(localStorage.getItem('sages_role_perms')) || {
+            "Главный администратор": { profile: true, support: true, admin: true, roles: true, createPromo: true, editUsers: true, editShop: true },
+            "Администратор": { profile: true, support: true, admin: true, roles: true, createPromo: true, editUsers: true, editShop: false },
+            "Модератор": { profile: true, support: true, admin: true, roles: false, createPromo: false, editUsers: true, editShop: false },
+            "Подписчик": { profile: true, support: true, admin: false, roles: false, createPromo: false, editUsers: false, editShop: false },
+            "Участник Perfect world": { profile: true, support: true, admin: false, roles: false, createPromo: false, editUsers: false, editShop: false },
+            "Участник": { profile: true, support: true, admin: false, roles: false, createPromo: false, editUsers: false, editShop: false },
+            "Заблокирован": { profile: false, support: false, admin: false, roles: false, createPromo: false, editUsers: false, editShop: false }
+        };
+
+        let dbStats = JSON.parse(localStorage.getItem('sages_db_stats')) || { reg: 112, del: 15, ban: 12, unban: 8 };
+
+        // База с добавлением кастомных прав для каждого пользователя
+        let allUsersMock = JSON.parse(localStorage.getItem('sages_all_users')) || {
+            "Александр_PW": { nick: "Александр_PW", provider: "VK ID", device: "💻 ПК", status: "Подтверждено ✅", role: "Участник Perfect world", online: true, currentScreen: "👤 Кабинет", customPerms: {active: false, profile:true, support:true, admin:false} },
+            "Елена_Dark": { nick: "Елена_Dark", provider: "Discord", device: "📱 Смартфон", status: "Подтверждено ✅", role: "Модератор", online: true, currentScreen: "🚀 Поддержка", customPerms: {active: false, profile:true, support:true, admin:false} },
+            "Ghost_RT": { nick: "Ghost_RT", provider: "E-mail", device: "📟 Планшет", status: "Забанен ⛔ (Причина: Спам)", role: "Заблокирован", online: false, currentScreen: "Офлайн", customPerms: {active: false} }
+        };
+
+        // ТЕКУЩИЕ ПРАВА (Для отрисовки интерфейса)
+        let currentActivePerms = { ...rolePerms["Участник"] };
+
+        window.onload = () => {
+            renderCharts();
+            applyAppSettings();
+            checkAuthUI(); // Здесь вычисляются currentActivePerms
+            renderPromos();
+            renderShopBuilder();
+            renderShop();
+            renderRequests();
+            renderAllUsersAdmin();
+            updateStats();
+            loadRolePerms();
+            updateDbStats();
+            
+            document.addEventListener('mousemove', function(e) {
+                let tooltip = document.getElementById('chart-tooltip');
+                if(tooltip.style.display === 'block') {
+                    tooltip.style.left = (e.pageX - 70) + 'px';
+                    tooltip.style.top = (e.pageY - 50) + 'px';
+                }
+            });
+        };
+
+        function updateStats() {
+            const period = document.getElementById('stats-select').value;
+            let pc = "10.2К", mob = "4.8К", tab = "2.7К", tv = "1.3К";
+            let cr = "+5", del = "-1", ban = "1", unban = "1";
+            
+            if(period === 'day') { pc = "340"; mob = "160"; tab = "90"; tv = "45"; cr="+5"; del="-1"; ban="1"; unban="1"; }
+            if(period === 'week') { pc = "2.4К"; mob = "1.1К"; tab = "600"; tv = "300"; cr="+24"; del="-4"; ban="3"; unban="2"; }
+            if(period === 'month') { pc = "10.2К"; mob = "4.8К"; tab = "2.7К"; tv = "1.3К"; cr="+112"; del="-15"; ban="12"; unban="8"; }
+            if(period === 'year') { pc = "120К"; mob = "57К"; tab = "32К"; tv = "15К"; cr="+850"; del="-95"; ban="74"; unban="68"; }
+            if(period === 'all') { pc = "350К"; mob = "170К"; tab = "90К"; tv = "42К"; cr="+2400"; del="-280"; ban="190"; unban="175"; }
+            
+            document.getElementById('stat-pc').innerText = `~${pc}`;
+            document.getElementById('stat-mob').innerText = `~${mob}`;
+            document.getElementById('stat-tab').innerText = `~${tab}`;
+            document.getElementById('stat-tv').innerText = `~${tv}`;
+            
+            document.getElementById('stat-cr').innerText = cr;
+            document.getElementById('stat-del').innerText = del;
+            document.getElementById('stat-ban').innerText = ban;
+            document.getElementById('stat-unban').innerText = unban;
+        }
+
+        function updateDbStats() {
+            document.getElementById('stat-db-reg').innerText = dbStats.reg;
+            document.getElementById('stat-db-del').innerText = dbStats.del;
+            document.getElementById('stat-db-ban').innerText = dbStats.ban;
+            document.getElementById('stat-db-unban').innerText = dbStats.unban;
+            
+            if(document.getElementById('admin-db-reg')) {
+                document.getElementById('admin-db-reg').innerText = dbStats.reg;
+                document.getElementById('admin-db-del').innerText = dbStats.del;
+                document.getElementById('admin-db-ban').innerText = dbStats.ban;
+                document.getElementById('admin-db-unban').innerText = dbStats.unban;
+            }
+            localStorage.setItem('sages_db_stats', JSON.stringify(dbStats));
+        }
+
+        function toggleAppSetting(key) {
+            playSound();
+            appSettings[key] = !appSettings[key];
+            localStorage.setItem('sages_app_settings', JSON.stringify(appSettings));
+            applyAppSettings();
+        }
+
+        function applyAppSettings() {
+            const setBtn = (id, isActive, textBase) => {
+                const btn = document.getElementById(id);
+                if(!btn) return;
+                if(isActive) {
+                    btn.classList.remove('off');
+                    btn.innerHTML = `<div class="bonus-dot"></div> ${textBase}: ВКЛ`;
+                } else {
+                    btn.classList.add('off');
+                    btn.innerHTML = `<div class="bonus-dot"></div> ${textBase}: ВЫКЛ`;
+                }
+            };
+            setBtn('btn-toggle-coins', appSettings.coins, 'НАЧИСЛЕНИЕ SAGES-COINS');
+            setBtn('btn-toggle-promos', appSettings.promos, 'АКТИВАЦИЯ ПРОМОКОДОВ');
+            setBtn('btn-toggle-donate', appSettings.donate, 'ПОДДЕРЖКА ЗА РУБЛИ');
+
+            const bCoins = document.getElementById('block-coins');
+            const bPromos = document.getElementById('block-promos');
+            const bDonate = document.getElementById('block-donate');
+            const bShopUser = document.getElementById('block-shop-user');
+
+            if(bCoins) bCoins.style.display = appSettings.coins ? 'block' : 'none';
+            if(bPromos) bPromos.style.display = appSettings.promos ? 'block' : 'none';
+            if(bDonate) bDonate.style.display = appSettings.donate ? 'block' : 'none';
+            if(bShopUser) bShopUser.style.display = appSettings.coins ? 'block' : 'none'; 
+        }
+
+        function toggleGlobalAudio() {
+            audioEnabled = !audioEnabled;
+            const btn = document.getElementById('audio-toggle-switch');
+            if (audioEnabled) {
+                btn.innerText = '🎵 Звук: ВКЛ';
+                btn.classList.remove('off');
+                startAmbient();
+            } else {
+                btn.innerText = '🎵 Звук: ВЫКЛ';
+                btn.classList.add('off');
+                if(audioCtx) audioCtx.suspend();
+                clearInterval(ambientInterval);
+                ambientInterval = null;
+            }
+        }
+
+        function playSound() {
+            if(!audioEnabled) return;
+            try {
+                if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if(audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            } catch(e) {}
+        }
+
+        function startAmbient() {
+            try {
+                if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if(audioCtx.state === 'suspended') audioCtx.resume();
+                if(!ambientInterval) {
+                    ambientInterval = setInterval(() => {
+                        if(!audioEnabled) return;
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.value = 200 + Math.random() * 50;
+                        gain.gain.setValueAtTime(0.005, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 2);
+                        osc.connect(gain); gain.connect(audioCtx.destination);
+                        osc.start(); osc.stop(audioCtx.currentTime + 2);
+                    }, 4000);
+                }
+            } catch(e){}
+        }
+
+        function renderCharts() {
+            let html = '';
+            for(let i = 1; i <= 14; i++) {
+                const height = Math.floor(Math.random() * 60 + 20);
+                const usersIn = Math.floor(Math.random() * 30 + 15);
+                const usersOut = Math.floor(usersIn / 3);
+                html += `<div class="chart-bar-single" style="height: ${height}\%;" onmouseenter="showChartTip(${i}, ${usersIn},${usersOut})" onmouseleave="hideChartTip()"></div>`;
+            }
+            const cHome = document.getElementById('interactive-bars-grid-home');
+            const cAdmin = document.getElementById('interactive-bars-grid-admin');
+            if(cHome) cHome.innerHTML = html;
+            if(cAdmin) cAdmin.innerHTML = html;
+        }
+
+        function showChartTip(day, uIn, uOut) {
+            const tip = document.getElementById('chart-tooltip');
+            tip.style.display = 'block';
+            tip.innerHTML = `<b>📅 ${day} сентября</b><br>Зашло: ${uIn} \vert{} Вышло: ${uOut}`;
+        }
+        function hideChartTip() { document.getElementById('chart-tooltip').style.display = 'none'; }
+
+        function getDeviceIcon() {
+            const ua = navigator.userAgent;
+            if (/Tablet|iPad/i.test(ua)) return '📟 Планшет';
+            if (/Mobile|Android|iP(hone|od)/i.test(ua)) return '📱 Смартфон';
+            if (/TV|SmartTV/i.test(ua)) return '📺 ТВ';
+            return '💻 ПК';
+        }
+
+        function instantLogin(provider) {
+            playSound();
+            const nick = prompt(`Вход через ${provider}. Укажите ваш ник:`, "Рекрут_" + Math.floor(Math.random()*900));
+            if(!nick) return;
+
+            const device = getDeviceIcon();
+            
+            const masterAliases = ['армен', 'armen', 'мастер', 'master', 'armen4ick96'];
+            const isMaster = masterAliases.includes(nick.toLowerCase().trim());
+            
+            const role = isMaster ? 'Главный администратор' : 'Участник';
+            const status = isMaster ? 'Подтверждено ✅' : 'Ожидает подтверждения';
+
+            currentUser = { 
+                nick, provider, device, status: status, role: role, online: true, currentScreen: '👤 Кабинет',
+                customPerms: { active: false, profile: true, support: true, admin: false }
+            };
+            
+            localStorage.setItem('sages_user', JSON.stringify(currentUser));
+            
+            allUsersMock[nick] = currentUser;
+            localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
+
+            if(!isMaster) {
+                adminRequests.push(currentUser);
+                localStorage.setItem('sages_requests', JSON.stringify(adminRequests));
+            }
+
+            dbStats.reg++;
+            updateDbStats();
+
+            document.querySelectorAll('.nav-tab').forEach(t => t.style.display = 'flex');
+
+            checkAuthUI();
+            renderAllUsersAdmin();
+            switchTab('screen-profile', document.getElementById('tab-profile'), '👤 Кабинет');
+            
+            if(isMaster) {
+                alert('С возвращением, Мастер! Вы вошли как Главный администратор.');
+            } else {
+                alert('Заявка на вход отправлена администратору.');
+            }
+        }
+
+        function logout() {
+            playSound();
+            if(currentUser && allUsersMock[currentUser.nick]) {
+                allUsersMock[currentUser.nick].online = false;
+                allUsersMock[currentUser.nick].currentScreen = "Офлайн";
+                localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
+            }
+            currentUser = null;
+            localStorage.removeItem('sages_user');
+            
+            checkAuthUI();
+            renderAllUsersAdmin();
+            switchTab('screen-home', document.getElementById('tab-home'), '🏠 Главная');
+        }
+
+        function checkAuthUI() {
+            const authBox = document.getElementById('auth-box');
+            const miniProf = document.getElementById('mini-profile-box');
+            
+            let currentPerms = rolePerms["Участник"]; 
+            
+            if(currentUser) {
+                if(allUsersMock[currentUser.nick]) {
+                    currentUser.status = allUsersMock[currentUser.nick].status;
+                    currentUser.role = allUsersMock[currentUser.nick].role || 'Участник';
+                    currentUser.customPerms = allUsersMock[currentUser.nick].customPerms || {active: false};
+                }
+
+                // Сначала берем права роли, затем перебиваем индивидуальными, если они активны
+                currentPerms = { ...rolePerms[currentUser.role] };
+                if (currentUser.customPerms && currentUser.customPerms.active) {
+                    currentPerms.profile = currentUser.customPerms.profile;
+                    currentPerms.support = currentUser.customPerms.support;
+                    currentPerms.admin = currentUser.customPerms.admin;
+                }
+
+                currentActivePerms = currentPerms; // Сохраняем глобально для отрисовки интерфейса админки
+
+                if(authBox) authBox.style.display = 'none';
+                if(miniProf) {
+                    miniProf.style.display = 'block';
+                    document.getElementById('mini-nick').innerText = currentUser.nick;
+                    document.getElementById('mini-status').innerText = `Статус: ${currentUser.status}`;
+                    document.getElementById('mini-status').style.color = currentUser.status.includes('✅') ? 'var(--success)' : (currentUser.status.includes('❌') ? 'var(--danger)' : 'var(--primary-orange)');
+                }
+                
+                document.getElementById('display-nick').innerText = currentUser.nick;
+                document.getElementById('prof-nick').value = currentUser.nick;
+                
+                const statEl = document.getElementById('profile-auth-status');
+                statEl.innerText = `Статус: ${currentUser.status}`;
+                statEl.style.color = currentUser.status.includes('✅') ? 'var(--success)' : (currentUser.status.includes('❌') ? 'var(--danger)' : 'var(--primary-orange)');
+                
+                document.getElementById('profile-device-info').innerHTML = `Устройство: <b>${currentUser.device}</b> \vert{} Вход: ${currentUser.provider}`;
+                
+                const rCol = ROLES[currentUser.role] || ROLES["Участник"];
+                document.getElementById('profile-role-display').innerHTML = `<div class="role-tag" style="background:${rCol}22; color:${rCol}; border:1px solid ${rCol};">${currentUser.role}</div>`;
+            } else {
+                currentActivePerms = rolePerms["Участник"];
+                if(authBox) authBox.style.display = 'block';
+                if(miniProf) miniProf.style.display = 'none';
+                document.getElementById('display-nick').innerText = "Гость";
+                document.getElementById('prof-nick').value = "";
+                document.getElementById('profile-auth-status').innerText = "Не авторизован";
+                document.getElementById('profile-auth-status').style.color = "var(--text-muted)";
+                document.getElementById('profile-device-info').innerText = "Устройство: Не определено";
+                document.getElementById('profile-role-display').innerHTML = "";
+            }
+
+            // Вкладки видны всегда (по запросу пользователя)
+            document.querySelectorAll('.nav-tab').forEach(t => t.style.display = 'flex');
+
+            // Блоки внутри админки скрываются если нет соответствующих прав у ТЕКУЩЕГО админа
+            document.getElementById('admin-block-promo').style.display = currentActivePerms.createPromo ? 'block' : 'none';
+            document.getElementById('admin-block-users').style.display = currentActivePerms.editUsers ? 'block' : 'none';
+            document.getElementById('admin-block-bans').style.display = currentActivePerms.editUsers ? 'block' : 'none';
+            document.getElementById('admin-block-reqs').style.display = currentActivePerms.editUsers ? 'block' : 'none';
+            document.getElementById('admin-block-shop').style.display = currentActivePerms.editShop ? 'block' : 'none';
+        }
+
+        function saveProfile() {
+            playSound();
+            if(!currentUser) return alert('Сначала войдите в систему!');
+            currentUser.nick = document.getElementById('prof-nick').value;
+            localStorage.setItem('sages_user', JSON.stringify(currentUser));
+            
+            if(allUsersMock[currentUser.nick]) {
+                allUsersMock[currentUser.nick].nick = currentUser.nick;
+                localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
+            }
+            
+            checkAuthUI();
+            alert('Позывной сохранен!');
+        }
+
+        function deleteUserDB(nick, isSelf = false) {
+            playSound();
+            if(!currentActivePerms.editUsers && !isSelf) return alert('Нет прав на удаление базы.');
+            
+            if(confirm(`Точно ПОЛНОСТЬЮ удалить профиль ${nick} из базы?`)) {
+                delete allUsersMock[nick];
+                localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
+                dbStats.del++;
+                updateDbStats();
+                
+                if(isSelf || (currentUser && currentUser.nick === nick)) {
+                    currentUser = null;
+                    localStorage.removeItem('sages_user');
+                    checkAuthUI();
+                    renderAllUsersAdmin();
+                    switchTab('screen-home', document.getElementById('tab-home'), '🏠 Главная');
+                    alert('Профиль успешно удален из базы.');
+                } else {
+                    renderAllUsersAdmin();
+                }
+            }
+        }
+
+        function deleteMyNick() {
+            if(!currentUser) return;
+            deleteUserDB(currentUser.nick, true);
+        }
+
+        function claimCashback() {
+            playSound();
+            const sum = document.getElementById('input-donation').value;
+            if(sum > 0) alert(`Спасибо за поддержку на ${sum} руб! SC начислены.`);
+            document.getElementById('input-donation').value = '';
+        }
+
+        function loadRolePerms() {
+            const role = document.getElementById('rbac-role-select').value;
+            const perms = rolePerms[role];
+            document.getElementById('perm-profile').checked = perms.profile;
+            document.getElementById('perm-support').checked = perms.support;
+            document.getElementById('perm-admin').checked = perms.admin;
+            document.getElementById('perm-roles').checked = perms.roles;
+            document.getElementById('perm-create-promo').checked = perms.createPromo;
+            document.getElementById('perm-edit-users').checked = perms.editUsers;
+            document.getElementById('perm-edit-shop').checked = perms.editShop;
+        }
+
+        function saveRolePerms() {
+            playSound();
+            const role = document.getElementById('rbac-role-select').value;
+            rolePerms[role] = {
+                profile: document.getElementById('perm-profile').checked,
+                support: document.getElementById('perm-support').checked,
+                admin: document.getElementById('perm-admin').checked,
+                roles: document.getElementById('perm-roles').checked,
+                createPromo: document.getElementById('perm-create-promo').checked,
+                editUsers: document.getElementById('perm-edit-users').checked,
+                editShop: document.getElementById('perm-edit-shop').checked
+            };
+            localStorage.setItem('sages_role_perms', JSON.stringify(rolePerms));
+            checkAuthUI();
+            renderAllUsersAdmin();
+            alert(`Права для роли "${role}" успешно обновлены!`);
+        }
+
+        function createPromo() {
+            playSound();
+            const code = document.getElementById('admin-code-val').value;
+            const desc = document.getElementById('admin-code-desc').value;
+            promoList.push({ code, desc });
+            renderPromos();
+        }
+
+        function renderPromos() {
+            const cont = document.getElementById('admin-promos-list');
+            if(!cont) return;
+            if(promoList.length === 0) { cont.innerHTML = '<div class="list-item" style="text-align:center; font-size:13px;">Нет активных кодов</div>'; return; }
+            let html = '';
+            promoList.forEach((p, i) => {
+                html += `
+                    <div class="list-item">
+                        <button class="btn-close" onclick="playSound(); promoList.splice(${i}, 1); renderPromos();">✕</button>
+                        <div style="font-weight:bold; font-size:16px; color:var(--primary-orange); margin-bottom: 4px;">🎟️ ${p.code}</div>
+                        <div style="font-size:12px; color:var(--text-muted);">${p.desc}</div>
+                    </div>`;
+            });
+            cont.innerHTML = html;
+        }
+
+        function renderRequests() {
+            const cont = document.getElementById('admin-requests-list');
+            if(!cont) return;
+            let reqs = adminRequests.filter(r => r.status.includes('Ожидает'));
+            
+            // Дизайн пустых заявок по скриншоту[span_5](start_span)[span_5](end_span)
+            if(reqs.length === 0) { 
+                cont.innerHTML = `
+                    <div style="text-align:center; padding: 20px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); font-size: 13px;">
+                        Нет заявок
+                    </div>`; 
+                return; 
+            }
+            
+            let html = '';
+            reqs.forEach((r, i) => {
+                let origIdx = adminRequests.indexOf(r);
+                html += `
+                    <div class="list-item">
+                        <button class="btn-close" onclick="playSound(); adminRequests.splice(${origIdx}, 1); localStorage.setItem('sages_requests', JSON.stringify(adminRequests)); renderRequests();">✕</button>
+                        <div style="font-weight:bold; font-size:15px; margin-bottom: 8px;">👤 ${r.nick} <span style="font-size:11px; color:var(--text-muted); font-weight:normal;">(${r.provider})</span></div>
+                        <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">Устройство: <b>${r.device}</b></div>
+                        <input type="text" id="rej-res-${origIdx}" class="form-control" style="padding:10px; font-size:13px; margin-bottom:10px;" placeholder="Причина отказа (необяз.)">
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-small" style="background:var(--success); font-size: 13px; width: 100%; padding: 10px;" onclick="modReq(${origIdx}, 'Подтверждено ✅', '')">Принять</button>
+                            <button class="btn-small" style="background:var(--danger); font-size: 13px; width: 100%; padding: 10px;" onclick="modReq(${origIdx}, 'Отклонено ❌', document.getElementById('rej-res-${origIdx}').value)">Отказать</button>
+                        </div>
+                    </div>`;
+            });
+            cont.innerHTML = html;
+        }
+
+        function modReq(i, stat, reason) {
+            playSound();
+            const finalStat = reason ? `${stat} (Причина: ${reason})` : stat;
+            adminRequests[i].status = finalStat;
+            localStorage.setItem('sages_requests', JSON.stringify(adminRequests));
+            
+            if(allUsersMock[adminRequests[i].nick]) {
+                allUsersMock[adminRequests[i].nick].status = finalStat;
+                localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
+            }
+            
+            checkAuthUI();
+            renderRequests();
+            renderAllUsersAdmin();
+        }
+
+        // --- ИНДИВИДУАЛЬНЫЕ ПРАВА И БАН ЛИСТ ---
+        function renderAllUsersAdmin() {
+            const contActive = document.getElementById('admin-all-users-list');
+            const contBanned = document.getElementById('admin-banned-list');
+            if(!contActive || !contBanned) return;
+
+            let htmlActive = '';
+            let htmlBanned = '';
+            let opts = Object.keys(ROLES).map(r => `<option value="${r}">${r}</option>`).join('');
+
+            Object.keys(allUsersMock).forEach(k => {
+                let u = allUsersMock[k];
+                if(!u.customPerms) u.customPerms = {active: false, profile:true, support:true, admin:false};
+
+                if(u.status.includes('Забанен')) {
+                    htmlBanned += `
+                        <div class="list-item" style="border: 1px solid rgba(255,51,68,0.4); background: rgba(255,51,68,0.05);">
+                            <button class="btn-close" onclick="playSound(); deleteUserDB('${k}')" title="Полностью удалить из БД">✕</button>
+                            <div style="font-weight:bold; font-size:15px; margin-bottom:8px; color:var(--danger);">⛔ ${u.nick}</div>
+                            <div style="font-size:12px; color:var(--text-muted); margin-bottom:4px;">Статус: <b style="color:var(--danger);">${u.status}</b></div>
+                            <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Устройство: <b>${u.device}</b></div>
+                            <div style="display:flex; gap:10px;">
+                                ${currentActivePerms.editUsers ? `<button class="btn-small" style="background:var(--success); flex:1; padding: 10px;" onclick="unbanUser('${k}')">Разбанить</button>` : ''}
+                            </div>
+                        </div>`;
+                } 
+                else if (u.status.includes('✅') || u.status.includes('❌')) {
+                    let isOnline = u.online !== false;
+                    let dotColor = isOnline ? '#00e65b' : '#555';
+                    let rCol = ROLES[u.role] || ROLES["Участник"];
+                    let currentScr = isOnline ? (u.currentScreen || 'На сайте') : 'Офлайн';
+                    let stColor = u.status.includes('✅') ? 'var(--success)' : 'var(--danger)';
+
+                    let roleSelect = currentActivePerms.roles ? `
+                        <select class="form-control" style="padding:8px; font-size:12px; margin-bottom:10px;" onchange="changeRole('${k}', this.value)">
+                            <option value="${u.role}" selected hidden>Изменить роль: ${u.role}</option>${opts}
+                        </select>` : ``;
+
+                    let buttons = '';
+                    if(currentActivePerms.editUsers) buttons += `<button class="btn-small" style="background:var(--danger); flex:1; padding: 8px;" onclick="banUser('${k}')">Забанить</button>`;
+                    if(currentActivePerms.roles) buttons += `<button class="btn-small" style="background:#555; flex:1; padding: 8px;" onclick="revokeRights('${k}')">Снять права</button>`;
+                    if(currentActivePerms.roles) buttons += `<button class="btn-small" style="background:var(--primary-orange); flex:0.5; padding: 8px;" onclick="toggleIndPerms('${k}')">⚙️</button>`;
+
+                    let indPermsBox = `
+                        <div id="ind-perms-${k}" class="individual-perms-box" style="display:none;">
+                            <div style="font-size:11px; color:var(--primary-orange); font-weight:bold; margin-bottom:6px;">ИНДИВИДУАЛЬНЫЕ ДОСТУПЫ:</div>
+                            <label style="font-size:11px; color:#fff; display:flex; gap:6px;"><input type="checkbox" id="up-act-${k}" ${u.customPerms.active ? 'checked':''} onchange="document.getElementById('up-opts-${k}').style.display = this.checked ? 'block':'none'"> Включить персональные настройки</label>
+                            <div id="up-opts-${k}" style="display:${u.customPerms.active ? 'block':'none'}; margin-top:8px;">
+                                <label style="font-size:11px; color:#fff; display:flex; gap:6px;"><input type="checkbox" id="up-prof-${k}" ${u.customPerms.profile ? 'checked':''}> Кабинет</label>
+                                <label style="font-size:11px; color:#fff; display:flex; gap:6px;"><input type="checkbox" id="up-supp-${k}" ${u.customPerms.support ? 'checked':''}> Поддержка</label>
+                                <label style="font-size:11px; color:#fff; display:flex; gap:6px;"><input type="checkbox" id="up-admin-${k}" ${u.customPerms.admin ? 'checked':''}> Админка</label>
+                            </div>
+                            <button class="btn-small" style="background:var(--success); width:100%; margin-top:10px; padding:8px;" onclick="saveUserPerms('${k}')">Сохранить доступы</button>
+                        </div>
+                    `;
+
+                    htmlActive += `
+                        <div class="list-item">
+                            <button class="btn-close" onclick="playSound(); deleteUserDB('${k}')" title="Полностью удалить из БД">✕</button>
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 10px; padding-right: 30px;">
+                                <div style="display:flex; align-items:center; gap:8px; font-weight:bold; font-size:14px;">
+                                    <div class="online-dot ${isOnline ? '' : 'offline'}"></div>
+                                    ${u.nick}
+                                </div>
+                                <div class="role-tag" style="background:${rCol}22; color:${rCol}; border:1px solid ${rCol}; margin:0;">${u.role}</div>
+                            </div>
+                            
+                            <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Статус: <b style="color:${stColor};">${u.status}</b></div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px;">Устройство: <b>${u.device}</b></div>
+                            <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">Где сейчас: <b style="color:var(--primary-orange);">${currentScr}</b></div>
+                            
+                            ${roleSelect}
+                            ${indPermsBox}
+
+                            <div style="display:flex; gap:8px;">
+                                ${buttons}
+                            </div>
+                        </div>`;
+                }
+            });
+
+            contActive.innerHTML = htmlActive || '<div class="list-item" style="text-align:center; font-size:12px;">База участников пуста</div>';
+            contBanned.innerHTML = htmlBanned || '<div class="list-item" style="text-align:center; font-size:12px;">Бан-лист пуст</div>';
+        }
+
+        function toggleIndPerms(k) {
+            playSound();
+            const el = document.getElementById(`ind-perms-${k}`);
+            if(el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function saveUserPerms(nick) {
+            playSound();
+            if(allUsersMock[nick]) {
+                allUsersMock[nick].customPerms = {
+                    active: document.getElementById(`up-act-${nick}`).checked,
+                    profile: document.getElementById(`up-prof-${nick}`).checked,
+                    support: document.getElementById(`up-supp-${nick}`).checked,
+                    admin: document.getElementById(`up-admin-${nick}`).checked
+                };
+                localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
+                alert(`Индивидуальные доступы для ${nick} сохранены!`);
+                if(currentUser && currentUser.nick === nick) checkAuthUI();
+                renderAllUsersAdmin();
+            }
+        }
+
+        function banUser(nick) {
+            playSound();
+            let reason = prompt(`Заблокировать участника ${nick}?\nУкажите причину (или оставьте пустым):`, "");
+            if(reason !== null) {
+                allUsersMock[nick].status = reason ? `Забанен ⛔ (Причина: ${reason})` : 'Забанен ⛔';
+                allUsersMock[nick].role = 'Заблокирован';
+                allUsersMock[nick].online = false;
+                allUsersMock[nick].currentScreen = 'Офлайн';
+                
+                localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
+                dbStats.ban++;
+                updateDbStats();
+                
+                if(currentUser && currentUser.nick === nick) logout();
+                else renderAllUsersAdmin();
+            }
+        }
+
+        function unbanUser(nick) {
+            playSound();
+            let reason = prompt(`Разблокировать участника ${nick}?\nУкажите причину разбана (или оставьте пустым):`, "");
+            if(reason !== null) {
+                allUsersMock[nick].status = reason ? `Подтверждено ✅ (Разбанен: ${reason})` : 'Подтверждено ✅';
+                allUsersMock[nick].role = 'Участник';
+                
+                localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
+                dbStats.unban++;
+                updateDbStats();
+                
+                renderAllUsersAdmin();
+            }
+        }
+
+        function revokeRights(nick) {
+            playSound();
+            if(allUsersMock[nick]) {
+                allUsersMock[nick].role = "Участник";
+                allUsersMock[nick].customPerms = {active: false}; // Сбрасываем инд. права
+                localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
+                if(currentUser && currentUser.nick === nick) checkAuthUI();
+                renderAllUsersAdmin();
+                alert(`Права у ${nick} сняты. Роль изменена на "Участник".`);
+            }
+        }
+
+        function changeRole(nick, role) {
+            playSound();
+            if(allUsersMock[nick]) {
+                allUsersMock[nick].role = role;
+                localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
+                if(currentUser && currentUser.nick === nick) checkAuthUI();
+                renderAllUsersAdmin();
+                alert(`Участнику ${nick} выдана роль: ${role}`);
+            }
+        }
+
+        function renderShopBuilder() {
+            const cont = document.getElementById('admin-shop-builder');
+            if(!cont) return;
+            let html = '';
+            shopItems.forEach((item, i) => {
+                const bg = item.active ? 'var(--success)' : 'var(--danger)';
+                const txt = item.active ? 'ВКЛ' : 'ВЫКЛ';
+                html += `
+                    <div class="list-item">
+                        <button class="btn-close" onclick="playSound(); shopItems.splice(${i},1); renderShopBuilder(); renderShop();">✕</button>
+                        <div style="display:flex; gap:8px; margin-bottom:10px; padding-right: 35px;">
+                            <input type="text" value="${item.name}" class="form-control" style="padding:10px; font-size:13px;" onchange="shopItems[${i}].name=this.value; renderShop();">
+                            <input type="number" value="${item.price}" class="form-control" style="padding:10px; font-size:13px; width:90px;" onchange="shopItems[${i}].price=this.value; renderShop();">
+                        </div>
+                        <input type="text" value="${item.desc}" class="form-control" style="padding:10px; font-size:12px; margin-bottom:10px;" onchange="shopItems[${i}].desc=this.value; renderShop();">
+                        <button class="btn-small" style="background:${bg}; width:100%; font-size:13px; padding:10px;" onclick="playSound(); shopItems[${i}].active=!shopItems[${i}].active; renderShopBuilder(); renderShop();">Статус отображения: ${txt}</button>
+                    </div>`;
+            });
+            cont.innerHTML = html;
+        }
+
+        function addShopItem() { playSound(); shopItems.push({ id: Date.now(), name: "Новая награда", desc: "Описание", price: 100, active: true }); renderShopBuilder(); renderShop(); }
+
+        function renderShop() {
+            const cont = document.getElementById('shop-container');
+            if(!cont) return;
+            let html = '';
+            shopItems.filter(i => i.active).forEach(item => {
+                html += `
+                    <div class="list-item flex-between" style="padding: 16px;">
+                        <div style="padding-right: 15px;">
+                            <div style="font-weight:bold; font-size:15px; color:#fff; margin-bottom:4px;">🎁 ${item.name}</div>
+                            <div style="font-size:12px; color:var(--text-muted); line-height: 1.4;">${item.desc}<br><b style="color:var(--primary-orange);">Цена: ${item.price} SC</b></div>
+                        </div>
+                        <button class="btn-action" style="width: auto; padding: 12px 18px; font-size: 13px; margin-bottom: 0;" onclick="playSound(); alert('Награда получена!')">Взять</button>
+                    </div>`;
+            });
+            if(!html) html = '<div style="text-align:center; font-size:12px; color:var(--danger); padding: 10px;">Магазин пуст</div>';
+            cont.innerHTML = html;
+        }
+
+        function switchTab(id, el, screenName) {
+            playSound();
+            
+            if(id === 'screen-admin' && !currentActivePerms.admin) {
+                alert('У вас нет прав для доступа к Панели управления!');
+                return;
+            }
+            if(id === 'screen-profile' && !currentActivePerms.profile) {
+                alert('У вас отключен доступ к Личному кабинету!');
+                return;
+            }
+            if(id === 'screen-cashback' && !currentActivePerms.support) {
+                alert('У вас отключен доступ к разделу Поддержки!');
+                return;
+            }
+
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+
+            if(currentUser) {
+                currentUser.currentScreen = screenName;
+                localStorage.setItem('sages_user', JSON.stringify(currentUser));
+                if(allUsersMock[currentUser.nick]) {
+                    allUsersMock[currentUser.nick].currentScreen = screenName;
+                    localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
+                }
+            }
+
+            if(id === 'screen-admin') { renderPromos(); renderRequests(); renderAllUsersAdmin(); renderShopBuilder(); }
+        }
+    </script>
+</body>
+</html>
