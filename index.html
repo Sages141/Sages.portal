@@ -152,14 +152,11 @@
         .btn-bonus-toggle.off .bonus-dot { background: #ffaaaa; }
         
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
-        
-        /* Блок индивидуальных настроек */
         .individual-perms-box { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px dashed rgba(255,85,0,0.3); }
     </style>
 </head>
 <body>
 
-    <!-- Глобальная тултипа для графиков -->
     <div id="chart-tooltip"></div>
 
     <div class="main-container">
@@ -172,9 +169,7 @@
             </div>
 
             <div class="grid-layout">
-                <!-- ЛЕВАЯ КОЛОНКА -->
                 <div>
-                    <!-- Компактный блок статуса и аудио -->
                     <div class="online-status-box">
                         <div style="display:flex; align-items:center;">
                             <div class="online-dot"></div> 
@@ -215,9 +210,7 @@
                     </div>
                 </div>
 
-                <!-- ПРАВАЯ КОЛОНКА -->
                 <div>
-                    <!-- БЫСТРЫЙ ВХОД -->
                     <div class="card" id="auth-box" style="margin-bottom: 24px;">
                         <div class="card-title">⚡ Быстрый вход в сообщество</div>
                         <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
@@ -230,7 +223,6 @@
                         </div>
                     </div>
 
-                    <!-- Карточка профиля после входа -->
                     <div class="card" id="mini-profile-box" style="display: none; margin-bottom: 24px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div style="display: flex; gap: 12px; align-items: center;">
@@ -244,7 +236,6 @@
                         </div>
                     </div>
 
-                    <!-- ССЫЛКИ -->
                     <div class="card">
                         <div class="card-title">🌐 Наши ресурсы</div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
@@ -254,7 +245,6 @@
                         </div>
                     </div>
 
-                    <!-- ПРЕИМУЩЕСТВА С ОБНОВЛЕННОЙ ЗАЩИТОЙ -->
                     <div class="card" style="margin-bottom: 0;">
                         <div class="card-title">🌟 Наши преимущества</div>
                         <div class="pros-grid">
@@ -329,8 +319,8 @@
                     <div class="card" id="block-promos">
                         <div class="card-title">🎟️ Активация кода</div>
                         <div style="display: flex; gap: 8px;">
-                            <input type="text" class="form-control" placeholder="Вставьте код..." style="margin: 0; padding:12px;">
-                            <button class="btn-action" style="width: auto; padding: 0 24px; margin: 0;" onclick="playSound(); alert('Код проверяется!')">ОК</button>
+                            <input type="text" id="promo-input-code" class="form-control" placeholder="Вставьте код..." style="margin: 0; padding:12px;">
+                            <button class="btn-action" style="width: auto; padding: 0 24px; margin: 0;" onclick="applyPromoCode()">ОК</button>
                         </div>
                     </div>
 
@@ -372,7 +362,6 @@
             </div>
 
             <div class="grid-layout">
-                <!-- ЛЕВАЯ КОЛОНКА -->
                 <div>
                     <div class="card" style="margin-bottom: 24px;">
                         <div class="card-title">📈 Статистика базы данных</div>
@@ -410,9 +399,7 @@
                     </div>
                 </div>
 
-                <!-- ПРАВАЯ КОЛОНКА -->
                 <div>
-                    <!-- Запросы входов пустые как на скриншоте -->
                     <div class="card" id="admin-block-reqs" style="margin-bottom: 24px;">
                         <div class="card-title">📥 Запросы входов (Ожидают)</div>
                         <div id="admin-requests-list">
@@ -420,7 +407,6 @@
                         </div>
                     </div>
 
-                    <!-- МЕГА МАТРИЦА (ПО СКРИНШОТУ[span_4](start_span)[span_4](end_span) И ЗАПРОСУ) -->
                     <div class="card" style="margin-bottom: 24px;">
                         <div class="card-title" style="color:var(--primary-orange);">🔐 МАТРИЦА ПРАВ РОЛЕЙ</div>
                         <div class="form-group">
@@ -498,10 +484,9 @@
     </nav>
 
     <script>
-        // --- ГЛОБАЛЬНЫЙ СБРОС КЕША ДЛЯ НОВЫХ ПРАВ ---
-        if(!localStorage.getItem('sages_v_final_mega_5')) {
+        if(!localStorage.getItem('sages_v_final_mega_real_v1')) {
             localStorage.clear();
-            localStorage.setItem('sages_v_final_mega_5', '1');
+            localStorage.setItem('sages_v_final_mega_real_v1', '1');
         }
 
         let audioEnabled = false;
@@ -510,8 +495,12 @@
         
         let currentUser = JSON.parse(localStorage.getItem('sages_user')) || null;
         let appSettings = JSON.parse(localStorage.getItem('sages_app_settings')) || { coins: true, promos: true, donate: true };
-        let promoList = [{ code: "Sages-K9R2", desc: "Дает +150 SC за активность в чате." }];
-        let shopItems = [
+        
+        let promoList = JSON.parse(localStorage.getItem('sages_promos')) || [
+            { code: "Sages-K9R2", desc: "Дает +150 SC за активность в чате." }
+        ];
+
+        let shopItems = JSON.parse(localStorage.getItem('sages_shop_items')) || [
             { id: 1, name: "Закрытый контент", desc: "Доступ к секретным материалам", price: 200, active: true },
             { id: 2, name: "Участие в розыгрыше", desc: "Шанс выиграть призы", price: 150, active: true }
         ];
@@ -528,7 +517,6 @@
             "Заблокирован": "var(--danger)"
         };
 
-        // В матрицу добавлены права: roles (Выдача ролей) и editUsers (Бан/Разбан/Входы)
         let rolePerms = JSON.parse(localStorage.getItem('sages_role_perms')) || {
             "Главный администратор": { profile: true, support: true, admin: true, roles: true, createPromo: true, editUsers: true, editShop: true },
             "Администратор": { profile: true, support: true, admin: true, roles: true, createPromo: true, editUsers: true, editShop: false },
@@ -541,20 +529,18 @@
 
         let dbStats = JSON.parse(localStorage.getItem('sages_db_stats')) || { reg: 112, del: 15, ban: 12, unban: 8 };
 
-        // База с добавлением кастомных прав для каждого пользователя
         let allUsersMock = JSON.parse(localStorage.getItem('sages_all_users')) || {
             "Александр_PW": { nick: "Александр_PW", provider: "VK ID", device: "💻 ПК", status: "Подтверждено ✅", role: "Участник Perfect world", online: true, currentScreen: "👤 Кабинет", customPerms: {active: false, profile:true, support:true, admin:false} },
             "Елена_Dark": { nick: "Елена_Dark", provider: "Discord", device: "📱 Смартфон", status: "Подтверждено ✅", role: "Модератор", online: true, currentScreen: "🚀 Поддержка", customPerms: {active: false, profile:true, support:true, admin:false} },
             "Ghost_RT": { nick: "Ghost_RT", provider: "E-mail", device: "📟 Планшет", status: "Забанен ⛔ (Причина: Спам)", role: "Заблокирован", online: false, currentScreen: "Офлайн", customPerms: {active: false} }
         };
 
-        // ТЕКУЩИЕ ПРАВА (Для отрисовки интерфейса)
         let currentActivePerms = { ...rolePerms["Участник"] };
 
         window.onload = () => {
             renderCharts();
             applyAppSettings();
-            checkAuthUI(); // Здесь вычисляются currentActivePerms
+            checkAuthUI();
             renderPromos();
             renderShopBuilder();
             renderShop();
@@ -596,17 +582,10 @@
         }
 
         function updateDbStats() {
-            document.getElementById('stat-db-reg').innerText = dbStats.reg;
-            document.getElementById('stat-db-del').innerText = dbStats.del;
-            document.getElementById('stat-db-ban').innerText = dbStats.ban;
-            document.getElementById('stat-db-unban').innerText = dbStats.unban;
-            
-            if(document.getElementById('admin-db-reg')) {
-                document.getElementById('admin-db-reg').innerText = dbStats.reg;
-                document.getElementById('admin-db-del').innerText = dbStats.del;
-                document.getElementById('admin-db-ban').innerText = dbStats.ban;
-                document.getElementById('admin-db-unban').innerText = dbStats.unban;
-            }
+            document.getElementById('admin-db-reg').innerText = dbStats.reg;
+            document.getElementById('admin-db-del').innerText = dbStats.del;
+            document.getElementById('admin-db-ban').innerText = dbStats.ban;
+            document.getElementById('admin-db-unban').innerText = dbStats.unban;
             localStorage.setItem('sages_db_stats', JSON.stringify(dbStats));
         }
 
@@ -731,7 +710,6 @@
             if(!nick) return;
 
             const device = getDeviceIcon();
-            
             const masterAliases = ['армен', 'armen', 'мастер', 'master', 'armen4ick96'];
             const isMaster = masterAliases.includes(nick.toLowerCase().trim());
             
@@ -797,7 +775,6 @@
                     currentUser.customPerms = allUsersMock[currentUser.nick].customPerms || {active: false};
                 }
 
-                // Сначала берем права роли, затем перебиваем индивидуальными, если они активны
                 currentPerms = { ...rolePerms[currentUser.role] };
                 if (currentUser.customPerms && currentUser.customPerms.active) {
                     currentPerms.profile = currentUser.customPerms.profile;
@@ -805,7 +782,7 @@
                     currentPerms.admin = currentUser.customPerms.admin;
                 }
 
-                currentActivePerms = currentPerms; // Сохраняем глобально для отрисовки интерфейса админки
+                currentActivePerms = currentPerms;
 
                 if(authBox) authBox.style.display = 'none';
                 if(miniProf) {
@@ -838,10 +815,8 @@
                 document.getElementById('profile-role-display').innerHTML = "";
             }
 
-            // Вкладки видны всегда (по запросу пользователя)
             document.querySelectorAll('.nav-tab').forEach(t => t.style.display = 'flex');
 
-            // Блоки внутри админки скрываются если нет соответствующих прав у ТЕКУЩЕГО админа
             document.getElementById('admin-block-promo').style.display = currentActivePerms.createPromo ? 'block' : 'none';
             document.getElementById('admin-block-users').style.display = currentActivePerms.editUsers ? 'block' : 'none';
             document.getElementById('admin-block-bans').style.display = currentActivePerms.editUsers ? 'block' : 'none';
@@ -852,15 +827,23 @@
         function saveProfile() {
             playSound();
             if(!currentUser) return alert('Сначала войдите в систему!');
-            currentUser.nick = document.getElementById('prof-nick').value;
-            localStorage.setItem('sages_user', JSON.stringify(currentUser));
+            const oldNick = currentUser.nick;
+            const newNick = document.getElementById('prof-nick').value;
             
-            if(allUsersMock[currentUser.nick]) {
-                allUsersMock[currentUser.nick].nick = currentUser.nick;
-                localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
+            if(!newNick) return alert('Позывной не может быть пустым!');
+
+            if(oldNick !== newNick) {
+                allUsersMock[newNick] = allUsersMock[oldNick];
+                delete allUsersMock[oldNick];
+                currentUser.nick = newNick;
             }
+
+            localStorage.setItem('sages_user', JSON.stringify(currentUser));
+            allUsersMock[currentUser.nick].nick = currentUser.nick;
+            localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
             
             checkAuthUI();
+            renderAllUsersAdmin();
             alert('Позывной сохранен!');
         }
 
@@ -899,6 +882,19 @@
             document.getElementById('input-donation').value = '';
         }
 
+        function applyPromoCode() {
+            playSound();
+            const val = document.getElementById('promo-input-code').value.trim();
+            if(!val) return alert('Введите промокод!');
+            const found = promoList.find(p => p.code === val);
+            if(found) {
+                alert(`Промокод успешно активирован! (${found.desc})`);
+                document.getElementById('promo-input-code').value = '';
+            } else {
+                alert('Неверный или просроченный промокод!');
+            }
+        }
+
         function loadRolePerms() {
             const role = document.getElementById('rbac-role-select').value;
             const perms = rolePerms[role];
@@ -931,10 +927,13 @@
 
         function createPromo() {
             playSound();
-            const code = document.getElementById('admin-code-val').value;
-            const desc = document.getElementById('admin-code-desc').value;
+            const code = document.getElementById('admin-code-val').value.trim();
+            const desc = document.getElementById('admin-code-desc').value.trim();
+            if(!code) return alert('Введите код!');
             promoList.push({ code, desc });
+            localStorage.setItem('sages_promos', JSON.stringify(promoList));
             renderPromos();
+            alert('Промокод успешно опубликован!');
         }
 
         function renderPromos() {
@@ -945,7 +944,7 @@
             promoList.forEach((p, i) => {
                 html += `
                     <div class="list-item">
-                        <button class="btn-close" onclick="playSound(); promoList.splice(${i}, 1); renderPromos();">✕</button>
+                        <button class="btn-close" onclick="playSound(); promoList.splice(${i}, 1); localStorage.setItem('sages_promos', JSON.stringify(promoList)); renderPromos();">✕</button>
                         <div style="font-weight:bold; font-size:16px; color:var(--primary-orange); margin-bottom: 4px;">🎟️ ${p.code}</div>
                         <div style="font-size:12px; color:var(--text-muted);">${p.desc}</div>
                     </div>`;
@@ -958,7 +957,6 @@
             if(!cont) return;
             let reqs = adminRequests.filter(r => r.status.includes('Ожидает'));
             
-            // Дизайн пустых заявок по скриншоту[span_5](start_span)[span_5](end_span)
             if(reqs.length === 0) { 
                 cont.innerHTML = `
                     <div style="text-align:center; padding: 20px; background: rgba(0,0,0,0.5); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); font-size: 13px;">
@@ -968,7 +966,7 @@
             }
             
             let html = '';
-            reqs.forEach((r, i) => {
+            reqs.forEach((r) => {
                 let origIdx = adminRequests.indexOf(r);
                 html += `
                     <div class="list-item">
@@ -1001,7 +999,6 @@
             renderAllUsersAdmin();
         }
 
-        // --- ИНДИВИДУАЛЬНЫЕ ПРАВА И БАН ЛИСТ ---
         function renderAllUsersAdmin() {
             const contActive = document.getElementById('admin-all-users-list');
             const contBanned = document.getElementById('admin-banned-list');
@@ -1027,12 +1024,11 @@
                             </div>
                         </div>`;
                 } 
-                else if (u.status.includes('✅') || u.status.includes('❌')) {
+                else if (u.status.includes('✅') || u.status.includes('❌') || u.status.includes('Ожидает')) {
                     let isOnline = u.online !== false;
-                    let dotColor = isOnline ? '#00e65b' : '#555';
                     let rCol = ROLES[u.role] || ROLES["Участник"];
                     let currentScr = isOnline ? (u.currentScreen || 'На сайте') : 'Офлайн';
-                    let stColor = u.status.includes('✅') ? 'var(--success)' : 'var(--danger)';
+                    let stColor = u.status.includes('✅') ? 'var(--success)' : (u.status.includes('❌') ? 'var(--danger)' : 'var(--primary-orange)');
 
                     let roleSelect = currentActivePerms.roles ? `
                         <select class="form-control" style="padding:8px; font-size:12px; margin-bottom:10px;" onchange="changeRole('${k}', this.value)">
@@ -1075,7 +1071,7 @@
                             ${roleSelect}
                             ${indPermsBox}
 
-                            <div style="display:flex; gap:8px;">
+                            <div style="display:flex; gap:8px; margin-top:8px;">
                                 ${buttons}
                             </div>
                         </div>`;
@@ -1145,7 +1141,7 @@
             playSound();
             if(allUsersMock[nick]) {
                 allUsersMock[nick].role = "Участник";
-                allUsersMock[nick].customPerms = {active: false}; // Сбрасываем инд. права
+                allUsersMock[nick].customPerms = {active: false};
                 localStorage.setItem('sages_all_users', JSON.stringify(allUsersMock));
                 if(currentUser && currentUser.nick === nick) checkAuthUI();
                 renderAllUsersAdmin();
@@ -1173,19 +1169,25 @@
                 const txt = item.active ? 'ВКЛ' : 'ВЫКЛ';
                 html += `
                     <div class="list-item">
-                        <button class="btn-close" onclick="playSound(); shopItems.splice(${i},1); renderShopBuilder(); renderShop();">✕</button>
+                        <button class="btn-close" onclick="playSound(); shopItems.splice(${i},1); localStorage.setItem('sages_shop_items', JSON.stringify(shopItems)); renderShopBuilder(); renderShop();">✕</button>
                         <div style="display:flex; gap:8px; margin-bottom:10px; padding-right: 35px;">
-                            <input type="text" value="${item.name}" class="form-control" style="padding:10px; font-size:13px;" onchange="shopItems[${i}].name=this.value; renderShop();">
-                            <input type="number" value="${item.price}" class="form-control" style="padding:10px; font-size:13px; width:90px;" onchange="shopItems[${i}].price=this.value; renderShop();">
+                            <input type="text" value="${item.name}" class="form-control" style="padding:10px; font-size:13px;" onchange="shopItems[${i}].name=this.value; localStorage.setItem('sages_shop_items', JSON.stringify(shopItems)); renderShop();">
+                            <input type="number" value="${item.price}" class="form-control" style="padding:10px; font-size:13px; width:90px;" onchange="shopItems[${i}].price=this.value; localStorage.setItem('sages_shop_items', JSON.stringify(shopItems)); renderShop();">
                         </div>
-                        <input type="text" value="${item.desc}" class="form-control" style="padding:10px; font-size:12px; margin-bottom:10px;" onchange="shopItems[${i}].desc=this.value; renderShop();">
-                        <button class="btn-small" style="background:${bg}; width:100%; font-size:13px; padding:10px;" onclick="playSound(); shopItems[${i}].active=!shopItems[${i}].active; renderShopBuilder(); renderShop();">Статус отображения: ${txt}</button>
+                        <input type="text" value="${item.desc}" class="form-control" style="padding:10px; font-size:12px; margin-bottom:10px;" onchange="shopItems[${i}].desc=this.value; localStorage.setItem('sages_shop_items', JSON.stringify(shopItems)); renderShop();">
+                        <button class="btn-small" style="background:${bg}; width:100%; font-size:13px; padding:10px;" onclick="playSound(); shopItems[${i}].active=!shopItems[${i}].active; localStorage.setItem('sages_shop_items', JSON.stringify(shopItems)); renderShopBuilder(); renderShop();">Статус отображения: ${txt}</button>
                     </div>`;
             });
             cont.innerHTML = html;
         }
 
-        function addShopItem() { playSound(); shopItems.push({ id: Date.now(), name: "Новая награда", desc: "Описание", price: 100, active: true }); renderShopBuilder(); renderShop(); }
+        function addShopItem() { 
+            playSound(); 
+            shopItems.push({ id: Date.now(), name: "Новая награда", desc: "Описание", price: 100, active: true }); 
+            localStorage.setItem('sages_shop_items', JSON.stringify(shopItems));
+            renderShopBuilder(); 
+            renderShop(); 
+        }
 
         function renderShop() {
             const cont = document.getElementById('shop-container');
