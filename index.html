@@ -15,35 +15,20 @@
             --border-color: rgba(255, 85, 0, 0.3);
             --success: #00e65b;
             --danger: #ff3344;
-            
             --role-main-admin: #ff7700;
-            --role-admin: #9933ff;
-            --role-moderator: #0088ff;
-            --role-sub: #00cc99;
-            --role-pw: #00cc44;
             --role-member: #ffcc00;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 
         body {
             background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(circle at 50% 10%, rgba(255, 85, 0, 0.1) 0%, transparent 60%),
-                linear-gradient(to bottom, #0a0604, #000000);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px 10px 100px 10px;
-            overflow-x: hidden;
         }
 
         .main-container {
@@ -53,211 +38,232 @@
             border: 1px solid var(--border-color);
             border-radius: 24px;
             padding: 24px;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px var(--accent-glow);
-            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
             margin-bottom: 10px;
         }
 
-        @media (min-width: 850px) {
-            .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
-            .full-width { grid-column: span 2; }
-        }
-        @media (max-width: 849px) {
-            .grid-layout { display: flex; flex-direction: column; gap: 16px; }
-        }
+        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+        @media (max-width: 849px) { .grid-layout { display: flex; flex-direction: column; gap: 16px; } }
 
-        .screen { display: none; animation: fadeIn 0.25s ease; }
+        .screen { display: none; }
         .screen.active { display: block; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
         .brand-header { text-align: center; margin-bottom: 20px; }
-        .brand-header h1 { font-size: 42px; letter-spacing: 4px; color: var(--primary-orange); text-shadow: 0 0 20px rgba(255,85,0,0.6); font-weight: 900; margin-bottom: 4px; }
-        .brand-header p { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; font-weight: bold; }
+        .brand-header h1 { font-size: 42px; color: var(--primary-orange); font-weight: 900; }
+        .brand-header p { font-size: 12px; color: var(--text-muted); text-transform: uppercase; }
 
         .card { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 85, 0, 0.15); border-radius: 16px; padding: 18px; margin-bottom: 16px; }
-        .card-title { font-size: 14px; font-weight: 800; color: var(--primary-orange); text-transform: uppercase; margin-bottom: 14px; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
-
-        .online-status-box { background: linear-gradient(145deg, rgba(0,255,100,0.08), rgba(0,0,0,0.6)); border: 1px solid rgba(0,255,100,0.25); padding: 14px 18px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: bold; margin-bottom: 16px; }
-        .online-dot { width: 12px; height: 12px; background-color: #00ff66; border-radius: 50%; box-shadow: 0 0 10px #00ff66; display: inline-block; transition: 0.3s; }
-        .online-dot.offline { background-color: #555; box-shadow: none; }
-
-        .audio-toggle-btn { background: rgba(255,85,0,0.15); border: 1px solid var(--primary-orange); color: #fff; font-size: 11px; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; margin: 0; }
-        .audio-toggle-btn.off { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); color: var(--text-muted); }
+        .card-title { font-size: 14px; font-weight: 800; color: var(--primary-orange); text-transform: uppercase; margin-bottom: 14px; }
 
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
-        @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr 1fr; } }
-        
         .stat-item { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.04); }
         .stat-val { font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 4px; }
-        .stat-lbl { font-size: 11px; color: var(--text-muted); line-height: 1.2; font-weight: bold; }
-
-        .interactive-chart-box { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 14px; position: relative; }
-        .chart-bars-row { display: flex; align-items: flex-end; gap: 4px; height: 50px; margin-top: 8px; }
-        .chart-bar-single { flex: 1; background: rgba(255,85,0,0.3); border-radius: 3px 3px 0 0; cursor: pointer; transition: 0.2s; }
-        .chart-bar-single:hover { background: var(--primary-orange); }
-        
-        #chart-tooltip { position: absolute; background: rgba(10,5,3,0.98); border: 1px solid var(--primary-orange); padding: 10px 14px; border-radius: 8px; font-size: 13px; color: #fff; pointer-events: none; display: none; z-index: 9999; box-shadow: 0 5px 15px rgba(255,85,0,0.5); white-space: nowrap; font-weight: bold; }
-
-        .pros-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        @media (max-width: 600px) { .pros-grid { grid-template-columns: 1fr; } }
-        .pro-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,85,0,0.15); padding: 14px; border-radius: 12px; }
-        .pro-card h4 { font-size: 14px; color: #fff; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
-        .pro-card p { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin: 0; }
-
-        .btn-action { display: block; width: 100%; padding: 14px; background: linear-gradient(135deg, #ff5500, #b32d00); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; text-align: center; transition: 0.2s; text-decoration: none; }
-        .btn-action:hover { filter: brightness(1.15); transform: translateY(-1px); }
-        .btn-danger { background: linear-gradient(135deg, #ff3344, #b30011); }
-        .btn-success { background: linear-gradient(135deg, #00e65b, #00b347); box-shadow: 0 4px 15px rgba(0, 230, 91, 0.3); }
+        .stat-lbl { font-size: 11px; color: var(--text-muted); }
 
         .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; font-weight: bold; }
+        .form-group label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
         .form-control { width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 13px; outline: none; }
-        .form-control:focus { border-color: var(--primary-orange); }
 
-        .profile-card { display: flex; align-items: center; gap: 16px; background: rgba(0,0,0,0.4); padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
-        .avatar { width: 55px; height: 55px; border-radius: 50%; background: linear-gradient(135deg, #ff5500, #220a00); display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid var(--primary-orange); }
-        
-        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #060402; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; box-shadow: 0 -5px 20px rgba(0,0,0,0.8); }
-        .nav-tab { background: none; border: none; color: var(--text-muted); font-size: 11px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
-        .nav-tab.active { color: var(--primary-orange); text-shadow: 0 0 10px rgba(255,85,0,0.4); }
+        .btn-action { display: block; width: 100%; padding: 14px; background: linear-gradient(135deg, #ff5500, #b32d00); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; text-transform: uppercase; cursor: pointer; text-align: center; }
+        .btn-success { background: linear-gradient(135deg, #00e65b, #00b347); }
+        .btn-small { padding: 8px 14px; font-size: 12px; border-radius: 8px; border: none; font-weight: bold; color: #fff; cursor: pointer; }
+
+        .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #060402; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; }
+        .nav-tab { background: none; border: none; color: var(--text-muted); font-size: 11px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-transform: uppercase; }
+        .nav-tab.active { color: var(--primary-orange); }
         .nav-tab svg { width: 22px; height: 22px; fill: currentColor; }
 
-        .footer-legal { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 5px; font-weight: bold; }
-
-        .list-item { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,165,0,0.2); padding: 14px; border-radius: 12px; margin-bottom: 10px; position: relative; font-size: 13px; transition: 0.2s; }
-        .btn-close { position: absolute; top: 12px; right: 12px; background: var(--danger); color: #fff; border: none; border-radius: 6px; width: 24px; height: 24px; font-size: 12px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
-        .btn-small { padding: 8px 14px; font-size: 12px; border-radius: 8px; border: none; font-weight: bold; color: #fff; cursor: pointer; transition: 0.2s; margin: 0; }
-        .role-tag { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-top: 6px; border: 1px solid; }
-        
-        .period-select-large { background: rgba(0,0,0,0.6); border: 1px solid var(--primary-orange); color: #fff; font-size: 13px; padding: 4px 10px; border-radius: 6px; outline: none; cursor: pointer; font-weight: bold; }
-        .scrollable-list { max-height: 450px; overflow-y: auto; padding-right: 6px; }
-        .scrollable-list::-webkit-scrollbar { width: 5px; }
-        .scrollable-list::-webkit-scrollbar-thumb { background: var(--primary-orange); border-radius: 10px; }
-
-        .btn-bonus-toggle { width: 100%; background: #00d636; color: #ffffff; border: none; border-radius: 10px; padding: 14px; margin-bottom: 10px; font-size: 13px; font-weight: 800; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; justify-content: flex-start; gap: 10px; transition: 0.2s; }
-        .btn-bonus-toggle.off { background: #ff3344; box-shadow: 0 4px 15px rgba(255, 51, 68, 0.3); }
-        .bonus-dot { width: 12px; height: 12px; border-radius: 50%; background: #aaffcc; box-shadow: inset 0 0 3px rgba(0,0,0,0.3); }
-        .btn-bonus-toggle.off .bonus-dot { background: #ffaaaa; }
-        
-        .flex-between { display: flex; justify-content: space-between; align-items: center; }
-        .individual-perms-box { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px dashed rgba(255,85,0,0.3); }
+        .list-item { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,165,0,0.2); padding: 14px; border-radius: 12px; margin-bottom: 10px; font-size: 13px; }
     </style>
 </head>
 <body>
 
-    <div id="chart-tooltip"></div>
-
     <div class="main-container">
         
-        <!-- ЭКРАН 1: ГЛАВНАЯ -->
+        <!-- ГЛАВНАЯ -->
         <div id="screen-home" class="screen active">
-            <div class="brand-header full-width">
+            <div class="brand-header">
                 <h1>Sages</h1>
                 <p>Элитное игровое сообщество</p>
             </div>
 
             <div class="grid-layout">
                 <div>
-                    <div class="online-status-box">
-                        <div style="display:flex; align-items:center;">
-                            <div class="online-dot"></div> 
-                            <span style="margin-left: 8px;">Бойцов в сети: <span style="color:var(--success);" id="live-online-counter">1</span></span>
-                        </div>
-                        <button class="audio-toggle-btn off" id="audio-toggle-switch" onclick="toggleGlobalAudio()">🎵 Звук: ВЫКЛ</button>
-                    </div>
-
                     <div class="card">
-                        <div class="card-title">
-                            <span>📊 Реальная статистика сайта</span>
-                            <select class="period-select-large" id="stats-select" onchange="playSound(); updateRealStats()">
-                                <option value="day">За день</option>
-                                <option value="week">За неделю</option>
-                                <option value="month" selected>За месяц</option>
-                                <option value="all">За всё время</option>
-                            </select>
-                        </div>
+                        <div class="card-title">📊 Честная статистика (без заглушек)</div>
                         <div class="stats-grid">
-                            <div class="stat-item"><div class="stat-val" id="rstat-pc">0</div><div class="stat-lbl">💻 ПК входы</div></div>
-                            <div class="stat-item"><div class="stat-val" id="rstat-mob">0</div><div class="stat-lbl">📱 Мобильные</div></div>
-                            <div class="stat-item"><div class="stat-val" id="rstat-tab">0</div><div class="stat-lbl">📟 Планшеты</div></div>
-                            <div class="stat-item"><div class="stat-val" id="rstat-tv">0</div><div class="stat-lbl">📺 Прочие</div></div>
-                        </div>
-
-                        <div class="stats-grid" style="margin-bottom: 10px;">
-                            <div class="stat-item"><div class="stat-val" id="rstat-reg" style="color:var(--success);">0</div><div class="stat-lbl">Регистраций</div></div>
-                            <div class="stat-item"><div class="stat-val" id="rstat-del" style="color:var(--danger);">0</div><div class="stat-lbl">Удалений</div></div>
-                            <div class="stat-item"><div class="stat-val" id="rstat-ban" style="color:var(--primary-orange);">0</div><div class="stat-lbl">Банов</div></div>
-                            <div class="stat-item"><div class="stat-val" id="rstat-unban" style="color:var(--success);">0</div><div class="stat-lbl">Разбанов</div></div>
-                        </div>
-
-                        <div class="interactive-chart-box">
-                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; font-weight: bold;">Динамика визитов (реальные клики/сессии):</div>
-                            <div class="chart-bars-row" id="interactive-bars-grid-home"></div>
+                            <div class="stat-item"><div class="stat-val" id="rstat-visits">0</div><div class="stat-lbl">Визитов</div></div>
+                            <div class="stat-item"><div class="stat-val" id="rstat-regs">0</div><div class="stat-lbl">Аккаунтов</div></div>
+                            <div class="stat-item"><div class="stat-val" id="rstat-bans">0</div><div class="stat-lbl">Банов</div></div>
+                            <div class="stat-item"><div class="stat-val" id="rstat-clicks">0</div><div class="stat-lbl">Кликов</div></div>
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <!-- РЕАЛЬНАЯ АВТОРИЗАЦИЯ И РЕГИСТРАЦИЯ -->
-                    <div class="card" id="auth-box" style="margin-bottom: 24px;">
-                        <div class="card-title">🔐 Авторизация / Регистрация</div>
-                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4;">
-                            Введите свой позывной и пароль для входа или создания аккаунта в базе.
+                    <!-- АВТОРИЗАЦИЯ -->
+                    <div class="card" id="auth-box">
+                        <div class="card-title">🔐 Вход / Регистрация</div>
+                        <div class="form-group">
+                            <label>Позывной (Ник)</label>
+                            <input type="text" id="auth-nick" class="form-control" placeholder="Введите ник...">
                         </div>
                         <div class="form-group">
-                            <label>Ваш позывной (Ник)</label>
-                            <input type="text" id="auth-input-nick" class="form-control" placeholder="Например: Скайп">
-                        </div>
-                        <div class="form-group">
-                            <label>Пароль / Пин-код</label>
-                            <input type="password" id="auth-input-pass" class="form-control" placeholder="Введите пароль...">
+                            <label>Пароль</label>
+                            <input type="password" id="auth-pass" class="form-control" placeholder="Пароль...">
                         </div>
                         <div style="display: flex; gap: 8px; margin-top: 14px;">
-                            <button class="btn-action" style="flex: 1; padding: 12px;" onclick="realLogin()">Войти</button>
-                            <button class="btn-action btn-success" style="flex: 1; padding: 12px;" onclick="realRegister()">Регистрация</button>
+                            <button class="btn-action" style="flex: 1; padding: 10px;" onclick="tryLogin()">Войти</button>
+                            <button class="btn-action btn-success" style="flex: 1; padding: 10px;" onclick="tryRegister()">Создать</button>
                         </div>
                     </div>
 
-                    <!-- Карточка профиля после входа -->
-                    <div class="card" id="mini-profile-box" style="display: none; margin-bottom: 24px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div style="display: flex; gap: 12px; align-items: center;">
-                                <div style="width: 44px; height: 44px; background: var(--primary-orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;">⚡</div>
-                                <div>
-                                    <div style="font-weight: bold; font-size: 16px; color: #fff;" id="mini-nick">Ник</div>
-                                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;" id="mini-status">Авторизован</div>
-                                </div>
-                            </div>
-                            <button class="btn-small" style="background: rgba(255,255,255,0.15); padding: 8px 14px;" onclick="logout()">Выйти</button>
-                        </div>
+                    <!-- ПРОФИЛЬ -->
+                    <div class="card" id="profile-box" style="display: none;">
+                        <div class="card-title">👤 Личный кабинет</div>
+                        <p id="profile-welcome" style="margin-bottom: 10px; font-size: 14px;"></p>
+                        <button class="btn-small" style="background: var(--danger);" onclick="logout()">Выйти из аккаунта</button>
                     </div>
 
                     <div class="card">
-                        <div class="card-title">🌐 Наши ресурсы</div>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <a href="https://vk.ru/sages_community" target="_blank" class="btn-action" style="flex: 1; margin: 0; padding: 12px; font-size: 12px; background: linear-gradient(135deg, #0077ff, #0044aa); box-shadow: none;">💬 Паблик VK</a>
-                            <a href="https://discord.gg/snZnu42c7j" target="_blank" class="btn-action" style="flex: 1; margin: 0; padding: 12px; font-size: 12px; background: linear-gradient(135deg, #5865f2, #353fa0); box-shadow: none;">🎧 Discord</a>
-                            <a href="https://vk.ru/armen4ick96" target="_blank" class="btn-action" style="flex: 1; margin: 0; padding: 12px; font-size: 12px; background: linear-gradient(135deg, #ff5500, #b32d00); box-shadow: none;">⚡ Мастер</a>
-                        </div>
+                        <div class="card-title">🌐 Ссылки</div>
+                        <a href="https://discord.gg/snZnu42c7j" target="_blank" class="btn-action" style="padding: 10px; font-size: 12px; text-decoration: none;">🎧 Наш Discord</a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ЭКРАН 2: ЛИЧНЫЙ КАБИНЕТ -->
+        <!-- КАБИНЕТ -->
         <div id="screen-profile" class="screen">
             <div class="brand-header">
                 <h1>Кабинет</h1>
-                <p>Личный профиль участника</p>
             </div>
-            
-            <div class="grid-layout">
-                <div>
-                    <div class="profile-card" style="background: transparent; border: none; padding: 0; margin-bottom: 16px; flex-direction: column; align-items: flex-start; gap: 8px;">
-                        <div style="display: flex; gap: 16px; align-items: center;">
-                            <div class="avatar">⚡</div>
-                            <div>
-                                <h3 id="display-nick">Гость</h3>
-                                <p id="profile-device-info">Устройство: Не определено</p>
-                                <p id="profile-auth-status" style="font-weight: bold; color: var(--text-muted); margin-top: 4px;">Не
+            <div class="card">
+                <p id="cabinet-info">Сначала авторизуйтесь на главной странице.</p>
+            </div>
+        </div>
+
+        <!-- АДМИНКА -->
+        <div id="screen-admin" class="screen">
+            <div class="brand-header">
+                <h1>Панель управления</h1>
+            </div>
+            <div class="card">
+                <div class="card-title">Список всех созданных пользователей</div>
+                <div id="admin-users-list"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="footer-legal">Оганесян Армен Арттурикович, 614110176423</div>
+
+    <nav class="nav-bar">
+        <button class="nav-tab active" onclick="switchTab('screen-home', this)">🏠 Главная</button>
+        <button class="nav-tab" onclick="switchTab('screen-profile', this)">👤 Кабинет</button>
+        <button class="nav-tab" onclick="switchTab('screen-admin', this)">⚙️ Админка</button>
+    </nav>
+
+    <script>
+        // Никаких фейковых данных: всё берется строго из хранилища браузера
+        let dbUsers = JSON.parse(localStorage.getItem('sages_pure_users')) || {};
+        let sessionUser = JSON.parse(localStorage.getItem('sages_pure_session')) || null;
+        let stats = JSON.parse(localStorage.getItem('sages_pure_stats')) || { visits: 0, regs: 0, bans: 0, clicks: 0 };
+
+        window.onload = () => {
+            // Считаем реальный визит только при реальной загрузке
+            stats.visits++;
+            saveStats();
+            updateUI();
+
+            // Считаем любые реальные клики по сайту
+            document.addEventListener('click', () => {
+                stats.clicks++;
+                saveStats();
+                updateUI();
+            });
+        };
+
+        function saveStats() {
+            localStorage.setItem('sages_pure_stats', JSON.stringify(stats));
+        }
+
+        function updateUI() {
+            document.getElementById('rstat-visits').innerText = stats.visits;
+            document.getElementById('rstat-regs').innerText = Object.keys(dbUsers).length;
+            document.getElementById('rstat-bans').innerText = stats.bans;
+            document.getElementById('rstat-clicks').innerText = stats.clicks;
+
+            const authBox = document.getElementById('auth-box');
+            const profBox = document.getElementById('profile-box');
+
+            if(sessionUser) {
+                authBox.style.display = 'none';
+                profBox.style.display = 'block';
+                document.getElementById('profile-welcome').innerText = `Вы вошли как: ${sessionUser.nick} (${sessionUser.role})`;
+                document.getElementById('cabinet-info').innerText = `Добро пожаловать, ${sessionUser.nick}! Ваш аккаунт успешно активен в базе.`;
+            } else {
+                authBox.style.display = 'block';
+                profBox.style.display = 'none';
+                document.getElementById('cabinet-info').innerText = 'Сначала авторизуйтесь на главной странице.';
+            }
+        }
+
+        function tryRegister() {
+            const nick = document.getElementById('auth-nick').value.trim();
+            const pass = document.getElementById('auth-pass').value.trim();
+            if(!nick || !pass) return alert('Заполните ник и пароль!');
+
+            if(dbUsers[nick]) return alert('Такой пользователь уже существует!');
+
+            // Первый зарегистрировавшийся автоматически становится Главным админом для теста
+            const isFirst = Object.keys(dbUsers).length === 0;
+            dbUsers[nick] = { nick, pass, role: isFirst ? 'Главный администратор' : 'Участник' };
+
+            localStorage.setItem('sages_pure_users', JSON.stringify(dbUsers));
+            alert('Регистрация успешна! Теперь нажмите «Войти».');
+            updateUI();
+        }
+
+        function tryLogin() {
+            const nick = document.getElementById('auth-nick').value.trim();
+            const pass = document.getElementById('auth-pass').value.trim();
+
+            const user = dbUsers[nick];
+            if(!user || user.pass !== pass) return alert('Неверный ник или пароль!');
+
+            sessionUser = user;
+            localStorage.setItem('sages_pure_session', JSON.stringify(sessionUser));
+            alert(`Добро пожаловать, ${nick}!`);
+            updateUI();
+        }
+
+        function logout() {
+            sessionUser = null;
+            localStorage.removeItem('sages_pure_session');
+            updateUI();
+        }
+
+        function switchTab(screenId, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+
+            if(screenId === 'screen-admin') {
+                renderAdminPanel();
+            }
+        }
+
+        function renderAdminPanel() {
+            const container = document.getElementById('admin-users-list');
+            let html = '';
+            Object.keys(dbUsers).forEach(nick => {
+                let u = dbUsers[nick];
+                html += `<div class="list-item"><b>${u.nick}</b> — Роль: ${u.role}</div>`;
+            });
+            container.innerHTML = html || '<div class="list-item">База данных пуста (никто еще не зарегистрировался).</div>';
+        }
+    </script>
+</body>
+</html>
